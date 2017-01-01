@@ -1,7 +1,7 @@
 package org.dsu.dao;
 
 import static org.dsu.TestObjectHelper.PAGE_DEFAULT;
-import static org.dsu.TestObjectHelper.PERSON_DEFAULT;
+import static org.dsu.TestObjectHelper.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -19,11 +19,16 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { DAOConfig.class, JPAConfig.class, DataSourceConfig.class })
 @ActiveProfiles("test")
+@TestPropertySource(locations = {
+		"classpath:test-jdbc.properties",
+		"classpath:test-hibernate.properties"
+		})
 public class LoanDAOTest {
 
 	@Autowired
@@ -78,6 +83,24 @@ public class LoanDAOTest {
 		List<Loan> result = loanDao.findByStatus(LoanStatus.APPROVED, PAGE_DEFAULT);
 
 		assertEquals(PAGE_DEFAULT.getPageSize(), result.size());
+	}
+	
+	@Test
+	public void givenApprovedLoan_WhenFindApprovedLoansByPerson_ThenReturnLoan() {
+		Loan loan = approvedLoan(null, 11.645, "term", personDao.save(PERSON_DEFAULT));
+		loanDao.save(loan);
+
+		List<Loan> result = loanDao.findByStatusAndPerson(LoanStatus.APPROVED, loan.getPerson(), PAGE_DEFAULT);
+
+		assertEquals(1, result.size());
+		Loan entity = result.get(0);
+		assertNotNull(entity.getId());
+		assertEquals(BigDecimal.valueOf(11.65), entity.getAmount());
+		assertEquals("term", entity.getTerm());
+		assertNotNull(entity.getCreated());
+		assertNotNull(entity.getPerson().getId());
+		assertEquals(PERSON_DEFAULT.getFirstName(), entity.getPerson().getFirstName());
+		assertEquals(PERSON_DEFAULT.getSurName(), entity.getPerson().getSurName());
 	}
 
 }

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** The controller processes requests working with loans.
@@ -31,7 +32,14 @@ public final class LoanController {
 	private LoanService loanService;
 
 	@RequestMapping(value="/approved", method=RequestMethod.GET)
-	public List<LoanDTO> getApprovedLoans(Pageable page) {
-		return loanService.findAllApproved(page);
+	public List<LoanDTO> getApprovedLoansByPersonId(@RequestParam(value = "personId", required = false) Long personId, 
+			Pageable page) {
+//		LOG.info("Page - " + page);
+//		LOG.info("Person - " + personId);
+		if(personId == null) {
+			return loanService.findApprovedLoans(page);
+		} else {
+			return loanService.findApprovedLoansByPersonId(personId, page);
+		}
 	}
 }

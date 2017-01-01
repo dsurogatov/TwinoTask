@@ -14,10 +14,25 @@ import org.springframework.data.domain.Pageable;
  */
 public interface LoanService {
 
-	/** Loads all approved loans using pagination.
+	/** Loads approved loans using pagination.
 	 * 
-	 * @param     Pagination information.
+	 * @param     The pagination information.
 	 * @return    The list of approved loans.
+	 * 
+	 * @throws {@link IllegalArgumentException}  
+	 *            if the page is null or {@link Pageable#getPageSize()} more than {@link Constant#PAGE_MAX_SIZE}
 	 */
-	List<LoanDTO> findAllApproved(Pageable page);
+	List<LoanDTO> findApprovedLoans(Pageable page);
+	
+	/** Loads approved loans by the person's id using pagination.
+	 * 
+	 * @param personId  The id of the person.
+	 * @param page      The pagination information.
+	 * @return
+	 * 
+	 * @throws {@link IllegalArgumentException}  
+	 *            if the page is null or {@link Pageable#getPageSize()} more than {@link Constant#PAGE_MAX_SIZE}.
+	 *            if personId is null.
+	 */
+	List<LoanDTO> findApprovedLoansByPersonId(Long personId, Pageable page);
 }

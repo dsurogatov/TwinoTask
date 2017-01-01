@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @ControllerAdvice
 public final class RestExceptionProcessor {
+	
+	//private static final Logger LOG = LoggerFactory.getLogger(RestExceptionProcessor.class);
 
 	/** Contains an error description.
 	 *  It is returned to client then an exception is thrown.
