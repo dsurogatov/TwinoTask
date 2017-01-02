@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.dsu.ApplicationException;
 import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
 import org.dsu.dto.PersonDTO;
@@ -162,7 +163,7 @@ public class LoanControllerApplyTest {
 		
 	@SuppressWarnings("unchecked")
 	@Test
-	public void givenApplyLoanServiceFails_whenAskApprovedLoans_ThenReturtInternalServerError() throws Exception {
+	public void givenApplyLoanServiceFails_WhenAskApplyLoan_ThenReturtInternalServerError() throws Exception {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
 		
 		when(applyLoanService.apply(any(ApplyLoanDTO.class))).thenThrow(Exception.class);
@@ -180,6 +181,29 @@ public class LoanControllerApplyTest {
 		verify(applyLoanService, times(1)).apply(any(ApplyLoanDTO.class));
         verifyNoMoreInteractions(applyLoanService);
 	}
+	
+	@Test
+	public void givenApplyLoanServiceThrowsApplicationException_WhenAskApplyLoan_ThenReturtForbidden() throws Exception {
+		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
+		
+		when(applyLoanService.apply(any(ApplyLoanDTO.class)))
+			.thenThrow(new ApplicationException(ApplicationException.Type.PERSON_IN_BLACKLIST));
+		
+		// perform a request
+		mvc.perform(MockMvcRequestBuilders.post("/api/v1/loan")
+				.contentType(ControllerTestUtil.APPLICATION_JSON_UTF8)
+		        .locale(Locale.ENGLISH)
+		        .content(objectMapper.writeValueAsBytes(dto)))
+				.andExpect(status().isForbidden())
+				.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+				.andExpect(jsonPath("$.message", is("The person is in the black list.")))
+				.andReturn().getResponse().getContentAsString()
+				;
+		
+		verify(applyLoanService, times(1)).apply(any(ApplyLoanDTO.class));
+        verifyNoMoreInteractions(applyLoanService);
+	}
+	
 
 	private ResultActions postObject(ApplyLoanDTO dto) throws Exception, JsonProcessingException {
 		return mvc.perform(MockMvcRequestBuilders.post("/api/v1/loan")

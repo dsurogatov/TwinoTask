@@ -1,7 +1,10 @@
 package org.dsu.service;
 
+import org.dsu.dao.BlackListDAO;
 import org.dsu.dao.LoanDAO;
 import org.dsu.dao.PersonDAO;
+import org.dsu.service.blacklist.PersonBlackListService;
+import org.dsu.service.blacklist.PersonBlackListServiceDatabaseImpl;
 import org.mockito.Mockito;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -32,5 +35,20 @@ public class ServiceConfig {
 	@Bean
 	public PersonDAO personDao() {
 		return Mockito.mock(PersonDAO.class);
+	}
+
+	@Bean
+	public BlackListDAO blackListDao() {
+		return Mockito.mock(BlackListDAO.class);
+	}
+	
+	@Bean
+	public PersonBlackListService personBlackListService() {
+		return Mockito.mock(PersonBlackListService.class);
+	}
+	
+	@Bean
+	public PersonBlackListService personBlackListServiceDatabaseImpl() {
+		return new PersonBlackListServiceDatabaseImpl();
 	}
 }

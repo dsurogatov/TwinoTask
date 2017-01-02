@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.dsu.ApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -77,6 +79,16 @@ public final class RestExceptionProcessor {
 	@Autowired
 	private MessageSource messageSource;
 
+	@ExceptionHandler(ApplicationException.class)
+	public ResponseEntity<ErrorInfo> handleException(ApplicationException ex) {
+		String message = messageSource.getMessage("application.exception." + ex.getType().name().toLowerCase(), null,
+		        LocaleContextHolder.getLocale());
+		if (ex.getType() == ApplicationException.Type.PERSON_IN_BLACKLIST) {
+			return new ResponseEntity<ErrorInfo>(new ErrorInfo(message), HttpStatus.FORBIDDEN);
+		}
+		return new ResponseEntity<ErrorInfo>(new ErrorInfo("Internal server error."), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
 	@ExceptionHandler(Exception.class)
 	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
 	@ResponseBody
@@ -84,7 +96,7 @@ public final class RestExceptionProcessor {
 		LOG.error(ex.getMessage(), ex);
 		return new ErrorInfo("Internal server error.");
 	}
-	
+
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody

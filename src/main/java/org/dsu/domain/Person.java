@@ -13,7 +13,7 @@ import javax.persistence.UniqueConstraint;
  * @author nescafe
  */
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"FIRSTNAME", "SURNAME"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"firstname", "surname"}))
 public class Person extends AbstractIdableEntity {
 
 	@Column(nullable = false, length = 1000)

@@ -11,6 +11,7 @@ import java.util.Locale;
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dsu.ApplicationException;
 import org.dsu.dao.LoanDAO;
 import org.dsu.dao.PersonDAO;
 import org.dsu.domain.Loan;
@@ -19,6 +20,7 @@ import org.dsu.domain.Person;
 import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
 import org.dsu.dto.PersonDTO;
+import org.dsu.service.blacklist.PersonBlackListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,9 @@ public class ApplyLoanServiceImpl implements ApplyLoanService {
 
 	@Autowired
 	private PersonDAO personDao;
+	
+	@Autowired
+	private PersonBlackListService personBlackListService;
 
 	@Override
 	public LoanDTO apply(ApplyLoanDTO applyDto) {
@@ -63,6 +68,8 @@ public class ApplyLoanServiceImpl implements ApplyLoanService {
 			createdPerson.setFirstName(firstName);
 			createdPerson.setSurName(surName);
 			person = personDao.save(createdPerson);
+		} else if (personBlackListService.inList(person.getId())) {
+			throw new ApplicationException(ApplicationException.Type.PERSON_IN_BLACKLIST);
 		}
 
 		Loan loan = new Loan();

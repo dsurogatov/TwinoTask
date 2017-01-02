@@ -7,8 +7,10 @@ import static org.dsu.TestObjectHelper.approvedLoan;
 import static org.dsu.TestObjectHelper.person;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -16,12 +18,14 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
+import org.dsu.ApplicationException;
 import org.dsu.dao.LoanDAO;
 import org.dsu.dao.PersonDAO;
 import org.dsu.domain.Loan;
 import org.dsu.domain.Person;
 import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
+import org.dsu.service.blacklist.PersonBlackListService;
 import org.dsu.service.loan.ApplyLoanService;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,10 +55,14 @@ public class ApplyLoanServiceTest {
 	@Autowired
 	private ApplyLoanService applyLoanService;
 
+	@Autowired
+	private PersonBlackListService personBlackListService;
+
 	@Before
 	public void setUp() {
 		Mockito.reset(loanDao);
 		Mockito.reset(personDao);
+		Mockito.reset(personBlackListService);
 	}
 
 	@Test
@@ -167,6 +175,38 @@ public class ApplyLoanServiceTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void givenBlankPersonsSurName_whenApplyLoan_ThenThrowsException() {
 		applyLoanService.apply(new ApplyLoanDTO(null, null, "firstName", "  "));
+	}
+	
+	@Test
+	public void givenPersonInBlackList_whenApplyLoan_ThenThrowsException() {
+		Person person = new Person();
+		person.setId(1L);
+		
+		when(personDao.findByFirstNameAndSurName(eq("firstName"), eq("surName"))).thenReturn(person);
+		when(personBlackListService.inList(anyLong())).thenReturn(true);
+
+		try {
+			applyLoanService.apply(new ApplyLoanDTO(null, null, "firstName", "surName"));
+		} catch (ApplicationException e) {
+			if(e.getType() != ApplicationException.Type.PERSON_IN_BLACKLIST) {
+				fail();
+			}
+		}
+		
+		verify(personBlackListService, times(1)).inList(anyLong());
+		verifyNoMoreInteractions(personBlackListService);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test(expected = Exception.class)
+	public void givenPersonInBlackListServiceFail_WhenApplyLoan_ThenThrowException() {
+		Person person = new Person();
+		person.setId(1L);
+		
+		when(personDao.findByFirstNameAndSurName(eq("firstName"), eq("surName"))).thenReturn(person);
+		when(personBlackListService.inList(anyLong())).thenThrow(Exception.class);
+
+		applyLoanService.apply(new ApplyLoanDTO(null, null, "firstName", "surName"));
 	}
 	
 }
