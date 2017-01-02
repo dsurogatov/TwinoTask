@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 import static org.mockito.Matchers.anyLong;
@@ -61,8 +62,8 @@ public class LoanControllerTest {
 	public void whenAskApprovedLoans_ThenReturnLoans() throws Exception {
 		List<LoanDTO> list = new ArrayList<>();
 		LocalDateTime createdDateTime = LocalDateTime.of(2016, 1, 1, 14, 16, 45);
-		list.add(new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", new PersonDTO(1L, "first", "second"), createdDateTime));
-		list.add(new LoanDTO(2L, BigDecimal.valueOf(212.45), "Term2", new PersonDTO(2L, "first2", "second2"), createdDateTime));
+		list.add(new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", new PersonDTO(1L, "first", "second"), createdDateTime, null));
+		list.add(new LoanDTO(2L, BigDecimal.valueOf(212.45), "Term2", new PersonDTO(2L, "first2", "second2"), createdDateTime, null));
 		
 		when(loanService.findApprovedLoans(any(Pageable.class))).thenReturn(list);
 
@@ -112,14 +113,14 @@ public class LoanControllerTest {
 	public void whenAskApprovedLoansByPersonId_ThenReturnLoans() throws Exception {
 		List<LoanDTO> list = new ArrayList<>();
 		LocalDateTime createdDateTime = LocalDateTime.of(2016, 1, 1, 14, 16, 45);
-		list.add(new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", new PersonDTO(1L, "first", "second"), createdDateTime));
-		list.add(new LoanDTO(2L, BigDecimal.valueOf(212.45), "Term2", new PersonDTO(2L, "first2", "second2"), createdDateTime));
+		list.add(new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", new PersonDTO(1L, "first", "second"), createdDateTime, null));
+		list.add(new LoanDTO(2L, BigDecimal.valueOf(212.45), "Term2", new PersonDTO(2L, "first2", "second2"), createdDateTime, null));
 		
 		// mock findAllApprovedByPersonId to return the loan list
 		when(loanService.findApprovedLoansByPersonId(anyLong(), any(Pageable.class))).thenReturn(list);
 		
 		// perform request
-		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved?personId=1&page=0&size=3").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person?id=1&page=0&size=3").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
 			.andExpect(jsonPath("$", hasSize(2)))
@@ -152,7 +153,7 @@ public class LoanControllerTest {
 		when(loanService.findApprovedLoansByPersonId(anyLong(), any(Pageable.class))).thenThrow(Exception.class);
 		
 		// perform a request
-		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved?personId=1").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person?id=1").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isInternalServerError())
 			.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
 			.andExpect(jsonPath("$.message", is("Internal server error.")))
@@ -160,6 +161,17 @@ public class LoanControllerTest {
 
 		verify(loanService, times(1)).findApprovedLoansByPersonId(anyLong(), any(Pageable.class));
         verifyNoMoreInteractions(loanService);
+	}
+	
+	@Test
+	public void givenMissedPersonId_whenAskApprovedLoansByPersonId_ThenReturtBadRequest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest())
+			.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+			.andExpect(jsonPath("$.message", is("Required Long parameter 'id' is not present")))
+			;
+
+        verifyZeroInteractions(loanService);
 	}
 	
 }

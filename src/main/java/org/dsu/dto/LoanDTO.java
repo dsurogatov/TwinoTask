@@ -15,21 +15,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class LoanDTO extends AbstractIdableDTO {
 
-	private final BigDecimal amount;
-	private final String term; 
+	private BigDecimal amount;
+	private String term; 
 	
 	@JsonProperty("person")
-	private final PersonDTO personDto;
+	private PersonDTO personDto;
 	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss") 
-	private final LocalDateTime created;
+	private LocalDateTime created;
+	private String statusName;
 	
-	public LoanDTO(Long id, BigDecimal amount, String term, PersonDTO dto, LocalDateTime created) {
+	public LoanDTO(Long id, BigDecimal amount, String term, PersonDTO dto, LocalDateTime created, String statusName) {
 		this.id = id;
 		this.amount = amount;
 		this.term = term; 
 		this.personDto = dto;
 		this.created = created;
+		this.statusName = statusName;
+	}
+	
+	public LoanDTO() {
 	}
 
 	/** Gets the amount value of the loan.
@@ -62,5 +67,19 @@ public class LoanDTO extends AbstractIdableDTO {
 	 */
 	public LocalDateTime getCreated() {
 		return created;
+	}
+
+	@Override
+	public String toString() {
+		return "LoanDTO [amount=" + amount + ", term=" + term + ", personDto=" + personDto + ", created=" + created
+		        + ", id=" + id + "]";
+	}
+
+	/** Gets the status name.
+	 *  
+	 * @return
+	 */
+	public String getStatusName() {
+		return statusName;
 	}
 }

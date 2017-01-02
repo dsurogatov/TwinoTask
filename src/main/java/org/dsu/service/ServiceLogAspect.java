@@ -42,7 +42,7 @@ public class ServiceLogAspect {
 		
 		String logMessage = serviceName + " execution time: " + stopWatch.getTotalTimeMillis() + " ms.";
 		if (ex != null) {
-			LOGGER.error("Exception in service: " + logMessage, ex);
+			LOGGER.info("Exception in service: " + logMessage);
 			throw ex;
 		} else {
 			LOGGER.info("Ending service: " + logMessage);

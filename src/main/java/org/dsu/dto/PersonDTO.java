@@ -9,8 +9,12 @@ package org.dsu.dto;
  */
 public class PersonDTO extends AbstractIdableDTO {
 
-	private final String firstName;
-	private final String surName;
+	private String firstName;
+	private String surName;
+	
+	public PersonDTO(){
+		
+	}
 	
 	public PersonDTO(Long id, String firstName, String surName) {
 		this.id = id;
@@ -32,5 +36,10 @@ public class PersonDTO extends AbstractIdableDTO {
 	 */
 	public String getSurName() {
 		return surName;
+	}
+
+	@Override
+	public String toString() {
+		return "PersonDTO [firstName=" + firstName + ", surName=" + surName + ", id=" + id + "]";
 	}
 }

@@ -1,15 +1,21 @@
 package org.dsu.controller;
 
+import org.dsu.service.loan.ApplyLoanService;
 import org.dsu.service.loan.LoanService;
 import org.mockito.Mockito;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableWebMvc
@@ -29,5 +35,26 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
     public LoanService loanService() {
         return Mockito.mock(LoanService.class);
     }
+
+	@Bean
+	public ApplyLoanService applyLoanService() {
+		return Mockito.mock(ApplyLoanService.class);
+	}
+	
+	@Bean
+    public ObjectMapper objectMapper() {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		return mapper;
+    }
+	
+	@Bean
+	public MessageSource messageSource() {
+		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("i18n/messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setUseCodeAsDefaultMessage(true);
+        return messageSource;
+	} 
 	
 }

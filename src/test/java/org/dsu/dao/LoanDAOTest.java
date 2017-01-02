@@ -1,7 +1,8 @@
 package org.dsu.dao;
 
 import static org.dsu.TestObjectHelper.PAGE_DEFAULT;
-import static org.dsu.TestObjectHelper.*;
+import static org.dsu.TestObjectHelper.PERSON_DEFAULT;
+import static org.dsu.TestObjectHelper.approvedLoan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -13,7 +14,8 @@ import org.dsu.config.DataSourceConfig;
 import org.dsu.config.JPAConfig;
 import org.dsu.domain.Loan;
 import org.dsu.domain.LoanStatus;
-import org.junit.Before;
+import org.dsu.domain.Person;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,14 +39,14 @@ public class LoanDAOTest {
 	@Autowired
 	private PersonDAO personDao;
 
-	@Before
+	@After
 	public void cleanData() {
 		loanDao.deleteAllInBatch();
 		personDao.deleteAllInBatch();
 	}
 
 	@Test
-	public void givenApprovedLoan_WhenFindApprovedLoans_ThenReturnLoan() {
+	public void givenApprovedLoan_WhenFindApprovedLoans_ThenReturnLoans() {
 		Loan loan = new Loan();
 		loan.setAmount(BigDecimal.valueOf(11.645));
 		loan.setTerm("term");
@@ -74,7 +76,10 @@ public class LoanDAOTest {
 			loan.setAmount(BigDecimal.valueOf(11.645));
 			loan.setTerm("term");
 			loan.setStatus(LoanStatus.APPROVED);
-			loan.setPerson(personDao.save(PERSON_DEFAULT));
+			Person person = new Person();
+			person.setFirstName("firstname" + i);
+			person.setSurName("surName");
+			loan.setPerson(personDao.save(person));
 			createdLoans.add(loan);
 		}
 
@@ -86,7 +91,7 @@ public class LoanDAOTest {
 	}
 	
 	@Test
-	public void givenApprovedLoan_WhenFindApprovedLoansByPerson_ThenReturnLoan() {
+	public void givenApprovedLoan_WhenFindApprovedLoansByPerson_ThenReturnLoans() {
 		Loan loan = approvedLoan(null, 11.645, "term", personDao.save(PERSON_DEFAULT));
 		loanDao.save(loan);
 

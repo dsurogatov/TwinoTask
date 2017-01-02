@@ -42,7 +42,7 @@ public class LoanServiceImpl implements LoanService {
 	private static LoanDTO toDTO(Loan loan) {
 		Person loanPerson = loan.getPerson();
 		PersonDTO loanPersonDTO = new PersonDTO(loanPerson.getId(), loanPerson.getFirstName(), loanPerson.getSurName());
-		return new LoanDTO(loan.getId(), loan.getAmount(), loan.getTerm(), loanPersonDTO, loan.getCreated());
+		return new LoanDTO(loan.getId(), loan.getAmount(), loan.getTerm(), loanPersonDTO, loan.getCreated(), null);
 	}
 
 	@Autowired
@@ -56,9 +56,9 @@ public class LoanServiceImpl implements LoanService {
 
 	@Override
 	public List<LoanDTO> findApprovedLoans(Pageable page) {
-		Assert.notNull(page, messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL, PAGE_ARGS, Locale.US));
+		Assert.notNull(page, messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL, PAGE_ARGS, Locale.ENGLISH));
 		Assert.isTrue(page.getPageSize() <= PAGE_MAX_SIZE,
-		        messageSource.getMessage(MESSAGE_PAGESIZE_MORE_THAN_MAX, PAGE_ARGS, Locale.US));
+		        messageSource.getMessage(MESSAGE_PAGESIZE_MORE_THAN_MAX, PAGE_ARGS, Locale.ENGLISH));
 
 		List<Loan> loans = loanDao.findByStatus(LoanStatus.APPROVED, page);
 		return loans.stream().map(LoanServiceImpl::toDTO).collect(Collectors.toList());
@@ -66,10 +66,10 @@ public class LoanServiceImpl implements LoanService {
 
 	@Override
 	public List<LoanDTO> findApprovedLoansByPersonId(Long personId, Pageable page) {
-		Assert.notNull(page, messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL, PAGE_ARGS, Locale.US));
+		Assert.notNull(page, messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL, PAGE_ARGS, Locale.ENGLISH));
 		Assert.isTrue(page.getPageSize() <= PAGE_MAX_SIZE,
-		        messageSource.getMessage(MESSAGE_PAGESIZE_MORE_THAN_MAX, PAGE_ARGS, Locale.US));
-		Assert.notNull(personId, messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL, PERSONID_ARGS, Locale.US));
+		        messageSource.getMessage(MESSAGE_PAGESIZE_MORE_THAN_MAX, PAGE_ARGS, Locale.ENGLISH));
+		Assert.notNull(personId, messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL, PERSONID_ARGS, Locale.ENGLISH));
 
 		Person person = personDao.findOne(personId);
 		if(person == null) {

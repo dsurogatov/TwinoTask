@@ -5,12 +5,15 @@ package org.dsu.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /** The entity for persons.
  *
  * @author nescafe
  */
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"FIRSTNAME", "SURNAME"}))
 public class Person extends AbstractIdableEntity {
 
 	@Column(nullable = false, length = 1000)
