@@ -2,13 +2,12 @@ package org.dsu.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
-import static org.mockito.Matchers.anyLong;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -120,7 +119,7 @@ public class LoanControllerTest {
 		when(loanService.findApprovedLoansByPersonId(anyLong(), any(Pageable.class))).thenReturn(list);
 		
 		// perform request
-		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person?id=1&page=0&size=3").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person/1?page=0&size=3").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
 			.andExpect(jsonPath("$", hasSize(2)))
@@ -153,7 +152,7 @@ public class LoanControllerTest {
 		when(loanService.findApprovedLoansByPersonId(anyLong(), any(Pageable.class))).thenThrow(Exception.class);
 		
 		// perform a request
-		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person?id=1").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person/1").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isInternalServerError())
 			.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
 			.andExpect(jsonPath("$.message", is("Internal server error.")))
@@ -161,17 +160,6 @@ public class LoanControllerTest {
 
 		verify(loanService, times(1)).findApprovedLoansByPersonId(anyLong(), any(Pageable.class));
         verifyNoMoreInteractions(loanService);
-	}
-	
-	@Test
-	public void givenMissedPersonId_whenAskApprovedLoansByPersonId_ThenReturtBadRequest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isBadRequest())
-			.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
-			.andExpect(jsonPath("$.message", is("Required Long parameter 'id' is not present")))
-			;
-
-        verifyZeroInteractions(loanService);
 	}
 	
 }

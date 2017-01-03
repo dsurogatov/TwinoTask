@@ -1,5 +1,6 @@
 package org.dsu.service;
 
+import org.dsu.component.RemoteAddressResolver;
 import org.dsu.dao.BlackListDAO;
 import org.dsu.dao.LoanDAO;
 import org.dsu.dao.PersonDAO;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @ComponentScan(basePackages = {"org.dsu.service"})
@@ -43,6 +45,11 @@ public class ServiceConfig {
 	}
 	
 	@Bean
+	public RemoteAddressResolver remoteAddressResolver() {
+		return Mockito.mock(RemoteAddressResolver.class);
+	}
+
+	@Bean
 	public PersonBlackListService personBlackListService() {
 		return Mockito.mock(PersonBlackListService.class);
 	}
@@ -50,5 +57,10 @@ public class ServiceConfig {
 	@Bean
 	public PersonBlackListService personBlackListServiceDatabaseImpl() {
 		return new PersonBlackListServiceDatabaseImpl();
+	}
+	
+	@Bean
+	public RestTemplate restTemplate() {
+		return Mockito.mock(RestTemplate.class);
 	}
 }

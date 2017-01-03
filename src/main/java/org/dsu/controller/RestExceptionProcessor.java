@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -80,7 +79,7 @@ public final class RestExceptionProcessor {
 	private MessageSource messageSource;
 
 	@ExceptionHandler(ApplicationException.class)
-	public ResponseEntity<ErrorInfo> handleException(ApplicationException ex) {
+	public ResponseEntity<ErrorInfo> handleApplicationException(ApplicationException ex) {
 		String message = messageSource.getMessage("application.exception." + ex.getType().name().toLowerCase(), null,
 		        LocaleContextHolder.getLocale());
 		if (ex.getType() == ApplicationException.Type.PERSON_IN_BLACKLIST) {
@@ -95,13 +94,6 @@ public final class RestExceptionProcessor {
 	public ErrorInfo handleAllException(Exception ex) {
 		LOG.error(ex.getMessage(), ex);
 		return new ErrorInfo("Internal server error.");
-	}
-
-	@ExceptionHandler(MissingServletRequestParameterException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	@ResponseBody
-	public ErrorInfo handleMissingServletRequestParameterException(Exception ex) {
-		return new ErrorInfo(ex.getMessage());
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

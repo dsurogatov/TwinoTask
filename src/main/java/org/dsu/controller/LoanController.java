@@ -13,14 +13,17 @@ import javax.validation.Valid;
 
 import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
+import org.dsu.service.countryresolver.CountryResolverService;
 import org.dsu.service.loan.ApplyLoanService;
 import org.dsu.service.loan.LoanService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -32,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(API + "/" + V1 + "/" + LOAN)
 public final class LoanController {
 
-	//private static final Logger LOG = LoggerFactory.getLogger(LoanController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LoanController.class);
 
 	@Autowired
 	private LoanService loanService;
@@ -40,19 +43,24 @@ public final class LoanController {
 	@Autowired
 	private ApplyLoanService applyLoanService;
 
+	@Autowired
+	private CountryResolverService countryResolverService;
+
 	@RequestMapping(value = "/approved", method = RequestMethod.GET)
 	public List<LoanDTO> getApprovedLoans(Pageable page) {
 		return loanService.findApprovedLoans(page);
 	}
 
-	@RequestMapping(value = "/approved/person", method = RequestMethod.GET)
-	public List<LoanDTO> getApprovedLoansByPersonId(@RequestParam(value = "id", required = true) Long personId, Pageable page) {
+	@RequestMapping(value = "/approved/person/{personId}", method = RequestMethod.GET)
+	public List<LoanDTO> getApprovedLoansByPersonId(@PathVariable Long personId, Pageable page) {
 		return loanService.findApprovedLoansByPersonId(personId, page);
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
 	public LoanDTO applyLoan(@Valid @RequestBody ApplyLoanDTO dto) {
 		//LOG.info("dto - " + dto);
+		String countryCode = countryResolverService.resolveCode();
+		LOG.info("cc - " + countryCode);
 		return applyLoanService.apply(dto);
 	}
 }

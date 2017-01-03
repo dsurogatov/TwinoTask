@@ -25,6 +25,7 @@ import org.dsu.ApplicationException;
 import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
 import org.dsu.dto.PersonDTO;
+import org.dsu.service.countryresolver.CountryResolverService;
 import org.dsu.service.loan.ApplyLoanService;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,10 +75,14 @@ public class LoanControllerApplyTest {
 
 	@Autowired
 	private ApplyLoanService applyLoanService;
-
+	
+	@Autowired
+	private CountryResolverService countryResolverService;
+	
 	@Before
 	public void setUp() {
 		Mockito.reset(applyLoanService);
+		Mockito.reset(countryResolverService);
 
 		mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 	}
@@ -97,6 +102,7 @@ public class LoanControllerApplyTest {
 		        .andExpect(jsonPath("$.validationMessages[*][1]", containsInAnyOrder(VALID_MAXLEN_MESS)));
 
 		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(countryResolverService);
 	}
 
 	@Test
@@ -122,7 +128,6 @@ public class LoanControllerApplyTest {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.ZERO, "s", "s", "s");
 
 		ResultActions ra = postObject(dto);
-
 		ra.andExpect(status().isBadRequest()).andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
 	        .andExpect(jsonPath("$.validationMessages", hasSize(1)))
 	        .andExpect(jsonPath("$.validationMessages[0][0]", is("amount")))
@@ -130,6 +135,7 @@ public class LoanControllerApplyTest {
 	        ;
 		
 		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(countryResolverService);
 	}
 	
 	@Test
@@ -141,10 +147,7 @@ public class LoanControllerApplyTest {
 		
 		when(applyLoanService.apply(any(ApplyLoanDTO.class))).thenReturn(retLoan);
 
-		mvc.perform(MockMvcRequestBuilders.post("/api/v1/loan")
-				.contentType(ControllerTestUtil.APPLICATION_JSON_UTF8)
-		        .locale(Locale.ENGLISH)
-		        .content(objectMapper.writeValueAsBytes(dto)))
+		postObject(dto)
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
 				.andExpect(jsonPath("$.id", is(1)))
@@ -159,6 +162,8 @@ public class LoanControllerApplyTest {
 
 		verify(applyLoanService, times(1)).apply(any(ApplyLoanDTO.class));
         verifyNoMoreInteractions(applyLoanService);
+        verify(countryResolverService, times(1)).resolveCode();
+        verifyNoMoreInteractions(countryResolverService);
 	}
 		
 	@SuppressWarnings("unchecked")
@@ -168,11 +173,7 @@ public class LoanControllerApplyTest {
 		
 		when(applyLoanService.apply(any(ApplyLoanDTO.class))).thenThrow(Exception.class);
 		
-		// perform a request
-		mvc.perform(MockMvcRequestBuilders.post("/api/v1/loan")
-				.contentType(ControllerTestUtil.APPLICATION_JSON_UTF8)
-		        .locale(Locale.ENGLISH)
-		        .content(objectMapper.writeValueAsBytes(dto)))
+		postObject(dto)
 				.andExpect(status().isInternalServerError())
 				.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
 				.andExpect(jsonPath("$.message", is("Internal server error.")))
@@ -180,31 +181,47 @@ public class LoanControllerApplyTest {
 		
 		verify(applyLoanService, times(1)).apply(any(ApplyLoanDTO.class));
         verifyNoMoreInteractions(applyLoanService);
+        verify(countryResolverService, times(1)).resolveCode();
+        verifyNoMoreInteractions(countryResolverService);
 	}
 	
 	@Test
-	public void givenApplyLoanServiceThrowsApplicationException_WhenAskApplyLoan_ThenReturtForbidden() throws Exception {
+	public void givenPersonInBlackList_WhenAskApplyLoan_ThenReturtForbidden() throws Exception {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
 		
 		when(applyLoanService.apply(any(ApplyLoanDTO.class)))
 			.thenThrow(new ApplicationException(ApplicationException.Type.PERSON_IN_BLACKLIST));
 		
-		// perform a request
-		mvc.perform(MockMvcRequestBuilders.post("/api/v1/loan")
-				.contentType(ControllerTestUtil.APPLICATION_JSON_UTF8)
-		        .locale(Locale.ENGLISH)
-		        .content(objectMapper.writeValueAsBytes(dto)))
+		postObject(dto)
 				.andExpect(status().isForbidden())
 				.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
 				.andExpect(jsonPath("$.message", is("The person is in the black list.")))
-				.andReturn().getResponse().getContentAsString()
 				;
 		
 		verify(applyLoanService, times(1)).apply(any(ApplyLoanDTO.class));
         verifyNoMoreInteractions(applyLoanService);
+        verify(countryResolverService, times(1)).resolveCode();
+        verifyNoMoreInteractions(countryResolverService);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void givenCountryResolverServiceFails_WhenAskApplyLoan_ThenReturtInternalServerError() throws Exception {
+		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
+		
+		when(countryResolverService.resolveCode()).thenThrow(Exception.class);
+		
+		postObject(dto)
+				.andExpect(status().isInternalServerError())
+				.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+				.andExpect(jsonPath("$.message", is("Internal server error.")))
+				;
+		
+		verifyZeroInteractions(applyLoanService);
+        verify(countryResolverService, times(1)).resolveCode();
+        verifyNoMoreInteractions(countryResolverService);
 	}
 	
-
 	private ResultActions postObject(ApplyLoanDTO dto) throws Exception, JsonProcessingException {
 		return mvc.perform(MockMvcRequestBuilders.post("/api/v1/loan")
 				.contentType(ControllerTestUtil.APPLICATION_JSON_UTF8)
@@ -222,6 +239,7 @@ public class LoanControllerApplyTest {
 		        .andExpect(jsonPath("$.validationMessages[*][1]", containsInAnyOrder(VALID_EMPTY_MESS)));
 
 		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(countryResolverService);
 	}
 
 }

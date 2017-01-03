@@ -12,7 +12,8 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotBlank;
 
-/** The class describes input data for the loan.
+/**
+ * The class describes input data for the loan.
  *
  * @author nescafe
  */
@@ -22,21 +23,21 @@ public class ApplyLoanDTO {
 	@Max(value = 1000000, message = "max.amount")
 	@Min(value = 1, message = "min.amount")
 	private BigDecimal amount;
-	
+
 	@NotBlank(message = "musnt.be.empty")
 	@Size(max = 10000, message = "size.max.10000")
-	private String term; 
-	
+	private String term;
+
 	@NotBlank(message = "musnt.be.empty")
 	@Size(max = 1000, message = "size.max.1000")
 	private String firstName;
-	
+
 	@NotBlank(message = "musnt.be.empty")
 	@Size(max = 1000, message = "size.max.1000")
 	private String surName;
-	
+
 	public ApplyLoanDTO() {
-		
+
 	}
 
 	public ApplyLoanDTO(BigDecimal amount, String term, String firstName, String surName) {
@@ -47,7 +48,8 @@ public class ApplyLoanDTO {
 		this.surName = surName;
 	}
 
-	/** Gets amount value of the loan.
+	/**
+	 * Gets amount value of the loan.
 	 * 
 	 * @return
 	 */
@@ -55,7 +57,8 @@ public class ApplyLoanDTO {
 		return amount;
 	}
 
-	/** Gets the term of the loan.
+	/**
+	 * Gets the term of the loan.
 	 * 
 	 * @return
 	 */
@@ -63,7 +66,8 @@ public class ApplyLoanDTO {
 		return term;
 	}
 
-	/** Gets the first name of the person who applies the loan.
+	/**
+	 * Gets the first name of the person who applies the loan.
 	 * 
 	 * @return
 	 */
@@ -71,11 +75,18 @@ public class ApplyLoanDTO {
 		return firstName;
 	}
 
-	/** Gets the surname of the person who applies the loan.
+	/**
+	 * Gets the surname of the person who applies the loan.
 	 * 
 	 * @return
 	 */
 	public String getSurName() {
 		return surName;
+	}
+
+	@Override
+	public String toString() {
+		return "ApplyLoanDTO [amount=" + amount + ", term=" + term + ", firstName=" + firstName + ", surName=" + surName
+		        + "]";
 	}
 }
