@@ -13,11 +13,10 @@ import javax.validation.Valid;
 
 import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
+import org.dsu.dto.PersonDTO;
 import org.dsu.service.countryresolver.CountryResolverService;
-import org.dsu.service.loan.ApplyLoanService;
+import org.dsu.service.loan.LoanApplyService;
 import org.dsu.service.loan.LoanService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,13 +34,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(API + "/" + V1 + "/" + LOAN)
 public final class LoanController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(LoanController.class);
+//	private static final Logger LOG = LoggerFactory.getLogger(LoanController.class);
 
 	@Autowired
 	private LoanService loanService;
 
 	@Autowired
-	private ApplyLoanService applyLoanService;
+	private LoanApplyService applyLoanService;
 
 	@Autowired
 	private CountryResolverService countryResolverService;
@@ -60,7 +59,8 @@ public final class LoanController {
 	public LoanDTO applyLoan(@Valid @RequestBody ApplyLoanDTO dto) {
 		//LOG.info("dto - " + dto);
 		String countryCode = countryResolverService.resolveCode();
-		LOG.info("cc - " + countryCode);
-		return applyLoanService.apply(dto);
+		LoanDTO loanDto = new LoanDTO(null, dto.getAmount(), dto.getTerm(), 
+				new PersonDTO(null, dto.getFirstName(), dto.getSurName()), null, null, countryCode);
+		return applyLoanService.apply(loanDto);
 	}
 }

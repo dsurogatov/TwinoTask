@@ -2,6 +2,7 @@ package org.dsu.service;
 
 import org.dsu.component.RemoteAddressResolver;
 import org.dsu.dao.BlackListDAO;
+import org.dsu.dao.CountryDAO;
 import org.dsu.dao.LoanDAO;
 import org.dsu.dao.PersonDAO;
 import org.dsu.service.blacklist.PersonBlackListService;
@@ -42,6 +43,11 @@ public class ServiceConfig {
 	@Bean
 	public BlackListDAO blackListDao() {
 		return Mockito.mock(BlackListDAO.class);
+	}
+
+	@Bean
+	public CountryDAO countryDao() {
+		return Mockito.mock(CountryDAO.class);
 	}
 	
 	@Bean

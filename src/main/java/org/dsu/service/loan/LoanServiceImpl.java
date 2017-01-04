@@ -20,7 +20,6 @@ import org.dsu.domain.Loan;
 import org.dsu.domain.LoanStatus;
 import org.dsu.domain.Person;
 import org.dsu.dto.LoanDTO;
-import org.dsu.dto.PersonDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
@@ -39,12 +38,6 @@ public class LoanServiceImpl implements LoanService {
 	private static final String[] PAGE_ARGS = new String[] {"page"};
 	private static final String[] PERSONID_ARGS = new String[] {"personId"};
 
-	private static LoanDTO toDTO(Loan loan) {
-		Person loanPerson = loan.getPerson();
-		PersonDTO loanPersonDTO = new PersonDTO(loanPerson.getId(), loanPerson.getFirstName(), loanPerson.getSurName());
-		return new LoanDTO(loan.getId(), loan.getAmount(), loan.getTerm(), loanPersonDTO, loan.getCreated(), null);
-	}
-
 	@Autowired
 	private MessageSource messageSource;
 
@@ -61,7 +54,7 @@ public class LoanServiceImpl implements LoanService {
 		        messageSource.getMessage(MESSAGE_PAGESIZE_MORE_THAN_MAX, PAGE_ARGS, Locale.ENGLISH));
 
 		List<Loan> loans = loanDao.findByStatus(LoanStatus.APPROVED, page);
-		return loans.stream().map(LoanServiceImpl::toDTO).collect(Collectors.toList());
+		return loans.stream().map(Converter::toLoanDTO).collect(Collectors.toList());
 	}
 
 	@Override
@@ -77,7 +70,7 @@ public class LoanServiceImpl implements LoanService {
 		}
 
 		List<Loan> loans = loanDao.findByStatusAndPerson(LoanStatus.APPROVED, person, page);
-		return loans.stream().map(LoanServiceImpl::toDTO).collect(Collectors.toList());
+		return loans.stream().map(Converter::toLoanDTO).collect(Collectors.toList());
 	}
 
 }

@@ -61,8 +61,8 @@ public class LoanControllerTest {
 	public void whenAskApprovedLoans_ThenReturnLoans() throws Exception {
 		List<LoanDTO> list = new ArrayList<>();
 		LocalDateTime createdDateTime = LocalDateTime.of(2016, 1, 1, 14, 16, 45);
-		list.add(new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", new PersonDTO(1L, "first", "second"), createdDateTime, null));
-		list.add(new LoanDTO(2L, BigDecimal.valueOf(212.45), "Term2", new PersonDTO(2L, "first2", "second2"), createdDateTime, null));
+		list.add(new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", new PersonDTO(1L, "first", "second"), createdDateTime, "approved", "ru"));
+		list.add(new LoanDTO(2L, BigDecimal.valueOf(212.45), "Term2", new PersonDTO(2L, "first2", "second2"), createdDateTime, "approved", "ru"));
 		
 		when(loanService.findApprovedLoans(any(Pageable.class))).thenReturn(list);
 
@@ -77,6 +77,8 @@ public class LoanControllerTest {
             .andExpect(jsonPath("$[0].person.firstName", is("first")))
             .andExpect(jsonPath("$[0].person.surName", is("second")))
             .andExpect(jsonPath("$[0].created", is("2016-01-01 14:16:45")))
+            .andExpect(jsonPath("$[0].statusName", is("approved")))
+            .andExpect(jsonPath("$[0].countryCode", is("ru")))
             .andExpect(jsonPath("$[1].id", is(2)))
             .andExpect(jsonPath("$[1].amount", is(BigDecimal.valueOf(212.45).doubleValue())))
             .andExpect(jsonPath("$[1].term", is("Term2")))
@@ -84,6 +86,8 @@ public class LoanControllerTest {
             .andExpect(jsonPath("$[1].person.firstName", is("first2")))
             .andExpect(jsonPath("$[1].person.surName", is("second2")))
             .andExpect(jsonPath("$[1].created", is("2016-01-01 14:16:45")))
+            .andExpect(jsonPath("$[1].statusName", is("approved")))
+            .andExpect(jsonPath("$[1].countryCode", is("ru")))
             ;
 
 		verify(loanService, times(1)).findApprovedLoans(any(Pageable.class));
@@ -112,8 +116,8 @@ public class LoanControllerTest {
 	public void whenAskApprovedLoansByPersonId_ThenReturnLoans() throws Exception {
 		List<LoanDTO> list = new ArrayList<>();
 		LocalDateTime createdDateTime = LocalDateTime.of(2016, 1, 1, 14, 16, 45);
-		list.add(new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", new PersonDTO(1L, "first", "second"), createdDateTime, null));
-		list.add(new LoanDTO(2L, BigDecimal.valueOf(212.45), "Term2", new PersonDTO(2L, "first2", "second2"), createdDateTime, null));
+		list.add(new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", new PersonDTO(1L, "first", "second"), createdDateTime, "approved", "ru"));
+		list.add(new LoanDTO(2L, BigDecimal.valueOf(212.45), "Term2", new PersonDTO(2L, "first2", "second2"), createdDateTime, "approved", "ru"));
 		
 		// mock findAllApprovedByPersonId to return the loan list
 		when(loanService.findApprovedLoansByPersonId(anyLong(), any(Pageable.class))).thenReturn(list);
@@ -130,6 +134,8 @@ public class LoanControllerTest {
 	        .andExpect(jsonPath("$[0].person.firstName", is("first")))
 	        .andExpect(jsonPath("$[0].person.surName", is("second")))
 	        .andExpect(jsonPath("$[0].created", is("2016-01-01 14:16:45")))
+	        .andExpect(jsonPath("$[0].statusName", is("approved")))
+            .andExpect(jsonPath("$[0].countryCode", is("ru")))
 	        .andExpect(jsonPath("$[1].id", is(2)))
 	        .andExpect(jsonPath("$[1].amount", is(BigDecimal.valueOf(212.45).doubleValue())))
 	        .andExpect(jsonPath("$[1].term", is("Term2")))
@@ -137,6 +143,8 @@ public class LoanControllerTest {
 	        .andExpect(jsonPath("$[1].person.firstName", is("first2")))
 	        .andExpect(jsonPath("$[1].person.surName", is("second2")))
 	        .andExpect(jsonPath("$[1].created", is("2016-01-01 14:16:45")))
+	        .andExpect(jsonPath("$[1].statusName", is("approved")))
+            .andExpect(jsonPath("$[1].countryCode", is("ru")))
 	        ;
 		
 		// verify calls of the LoanService

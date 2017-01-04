@@ -3,6 +3,7 @@ package org.dsu.service;
 import static org.dsu.TestObjectHelper.PAGE_DEFAULT;
 import static org.dsu.TestObjectHelper.approvedLoan;
 import static org.dsu.TestObjectHelper.person;
+import static org.dsu.TestObjectHelper.country;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -57,7 +58,7 @@ public class LoanServiceTest {
 
 	@Test
 	public void whenRunFindApprovedLoans_ThenReturnLoanList() {
-		Loan loan = approvedLoan(1L, 11.6, "term", person(1L, "firstName", "surName"));
+		Loan loan = approvedLoan(1L, 11.6, "term", person(1L, "firstName", "surName"),  country(1L, "ru"));
 		List<Loan> list = Arrays.asList(loan);
 
 		// mock dao to find loans
@@ -74,6 +75,7 @@ public class LoanServiceTest {
 		assertEquals(Long.valueOf(1L), dto.getPersonDto().getId());
 		assertEquals("firstName", dto.getPersonDto().getFirstName());
 		assertEquals("surName", dto.getPersonDto().getSurName());
+		assertEquals("ru", dto.getCountryCode());
 
 		// verify number of calls
 		verify(loanDao, times(1)).findByStatus(eq(LoanStatus.APPROVED), any(Pageable.class));
@@ -100,7 +102,7 @@ public class LoanServiceTest {
 
 	@Test
 	public void whenRunFindApprovedLoansByPersonId_ThenReturnLoanList() {
-		Loan loan = approvedLoan(1L, 11.6, "term", person(1L, "firstName", "surName"));
+		Loan loan = approvedLoan(1L, 11.6, "term", person(1L, "firstName", "surName"), country(1L, "ru"));
 		List<Loan> list = Arrays.asList(loan);
 
 		when(loanDao.findByStatusAndPerson(eq(LoanStatus.APPROVED), any(Person.class), any(Pageable.class)))
@@ -118,6 +120,7 @@ public class LoanServiceTest {
 		assertEquals(Long.valueOf(1L), dto.getPersonDto().getId());
 		assertEquals("firstName", dto.getPersonDto().getFirstName());
 		assertEquals("surName", dto.getPersonDto().getSurName());
+		assertEquals("ru", dto.getCountryCode());
 
 		verify(loanDao, times(1)).findByStatusAndPerson(eq(LoanStatus.APPROVED), any(Person.class),
 		        any(Pageable.class));

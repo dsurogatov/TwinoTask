@@ -34,6 +34,10 @@ public class Loan extends AbstractIdableEntity {
 	@ManyToOne
 	@JoinColumn(name = "person_id", nullable = false)
 	private Person person;
+	
+	@ManyToOne
+	@JoinColumn(name = "country_id")
+	private Country country;
 
 	@Column(nullable = false)
 	private LocalDateTime created = LocalDateTime.now();
@@ -116,6 +120,22 @@ public class Loan extends AbstractIdableEntity {
 	 */
 	public LocalDateTime getCreated() {
 		return created;
+	}
+
+	/** Gets the {@link Country} entity.
+	 * 
+	 * @return
+	 */
+	public Country getCountry() {
+		return country;
+	}
+
+	/** Sets the {@link Country} entity.
+	 *  
+	 * @param country
+	 */
+	public void setCountry(Country country) {
+		this.country = country;
 	}
 
 }

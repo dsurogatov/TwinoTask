@@ -24,14 +24,17 @@ public class LoanDTO extends AbstractIdableDTO {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss") 
 	private LocalDateTime created;
 	private String statusName;
+	private String countryCode;
 	
-	public LoanDTO(Long id, BigDecimal amount, String term, PersonDTO dto, LocalDateTime created, String statusName) {
+	public LoanDTO(Long id, BigDecimal amount, String term, PersonDTO dto, LocalDateTime created, 
+			String statusName, String countryCode) {
 		this.id = id;
 		this.amount = amount;
 		this.term = term; 
 		this.personDto = dto;
 		this.created = created;
 		this.statusName = statusName;
+		this.countryCode = countryCode;
 	}
 	
 	public LoanDTO() {
@@ -69,17 +72,25 @@ public class LoanDTO extends AbstractIdableDTO {
 		return created;
 	}
 
-	@Override
-	public String toString() {
-		return "LoanDTO [amount=" + amount + ", term=" + term + ", personDto=" + personDto + ", created=" + created
-		        + ", id=" + id + "]";
-	}
-
 	/** Gets the status name.
 	 *  
 	 * @return
 	 */
 	public String getStatusName() {
 		return statusName;
+	}
+
+	/** Gets the country code wherefrom the loan has applied.  
+	 * 
+	 * @return
+	 */
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	@Override
+	public String toString() {
+		return "LoanDTO [amount=" + amount + ", term=" + term + ", personDto=" + personDto + ", created=" + created
+		        + ", statusName=" + statusName + ", countryCode=" + countryCode + ", id=" + id + "]";
 	}
 }

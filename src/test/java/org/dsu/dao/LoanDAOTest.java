@@ -5,6 +5,7 @@ import static org.dsu.TestObjectHelper.PERSON_DEFAULT;
 import static org.dsu.TestObjectHelper.approvedLoan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -92,7 +93,7 @@ public class LoanDAOTest {
 	
 	@Test
 	public void givenApprovedLoan_WhenFindApprovedLoansByPerson_ThenReturnLoans() {
-		Loan loan = approvedLoan(null, 11.645, "term", personDao.save(PERSON_DEFAULT));
+		Loan loan = approvedLoan(null, 11.645, "term", personDao.save(PERSON_DEFAULT), null);
 		loanDao.save(loan);
 
 		List<Loan> result = loanDao.findByStatusAndPerson(LoanStatus.APPROVED, loan.getPerson(), PAGE_DEFAULT);
@@ -106,6 +107,7 @@ public class LoanDAOTest {
 		assertNotNull(entity.getPerson().getId());
 		assertEquals(PERSON_DEFAULT.getFirstName(), entity.getPerson().getFirstName());
 		assertEquals(PERSON_DEFAULT.getSurName(), entity.getPerson().getSurName());
+		assertNull(entity.getCountry());
 	}
 
 }

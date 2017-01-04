@@ -26,7 +26,7 @@ import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
 import org.dsu.dto.PersonDTO;
 import org.dsu.service.countryresolver.CountryResolverService;
-import org.dsu.service.loan.ApplyLoanService;
+import org.dsu.service.loan.LoanApplyService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,7 +74,7 @@ public class LoanControllerApplyTest {
 	private WebApplicationContext webApplicationContext;
 
 	@Autowired
-	private ApplyLoanService applyLoanService;
+	private LoanApplyService applyLoanService;
 	
 	@Autowired
 	private CountryResolverService countryResolverService;
@@ -143,9 +143,9 @@ public class LoanControllerApplyTest {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
 		LocalDateTime createdDateTime = LocalDateTime.of(2016, 1, 1, 14, 16, 45);
 		LoanDTO retLoan = new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", 
-				new PersonDTO(1L, "first", "second"), createdDateTime, "approved");
+				new PersonDTO(1L, "first", "second"), createdDateTime, "approved", null);
 		
-		when(applyLoanService.apply(any(ApplyLoanDTO.class))).thenReturn(retLoan);
+		when(applyLoanService.apply(any(LoanDTO.class))).thenReturn(retLoan);
 
 		postObject(dto)
 				.andExpect(status().isOk())
@@ -160,7 +160,7 @@ public class LoanControllerApplyTest {
 	            .andExpect(jsonPath("$.statusName", is("approved")))
 	            ;
 
-		verify(applyLoanService, times(1)).apply(any(ApplyLoanDTO.class));
+		verify(applyLoanService, times(1)).apply(any(LoanDTO.class));
         verifyNoMoreInteractions(applyLoanService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
@@ -171,7 +171,7 @@ public class LoanControllerApplyTest {
 	public void givenApplyLoanServiceFails_WhenAskApplyLoan_ThenReturtInternalServerError() throws Exception {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
 		
-		when(applyLoanService.apply(any(ApplyLoanDTO.class))).thenThrow(Exception.class);
+		when(applyLoanService.apply(any(LoanDTO.class))).thenThrow(Exception.class);
 		
 		postObject(dto)
 				.andExpect(status().isInternalServerError())
@@ -179,7 +179,7 @@ public class LoanControllerApplyTest {
 				.andExpect(jsonPath("$.message", is("Internal server error.")))
 				;
 		
-		verify(applyLoanService, times(1)).apply(any(ApplyLoanDTO.class));
+		verify(applyLoanService, times(1)).apply(any(LoanDTO.class));
         verifyNoMoreInteractions(applyLoanService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
@@ -189,7 +189,7 @@ public class LoanControllerApplyTest {
 	public void givenPersonInBlackList_WhenAskApplyLoan_ThenReturtForbidden() throws Exception {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
 		
-		when(applyLoanService.apply(any(ApplyLoanDTO.class)))
+		when(applyLoanService.apply(any(LoanDTO.class)))
 			.thenThrow(new ApplicationException(ApplicationException.Type.PERSON_IN_BLACKLIST));
 		
 		postObject(dto)
@@ -198,7 +198,7 @@ public class LoanControllerApplyTest {
 				.andExpect(jsonPath("$.message", is("The person is in the black list.")))
 				;
 		
-		verify(applyLoanService, times(1)).apply(any(ApplyLoanDTO.class));
+		verify(applyLoanService, times(1)).apply(any(LoanDTO.class));
         verifyNoMoreInteractions(applyLoanService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
