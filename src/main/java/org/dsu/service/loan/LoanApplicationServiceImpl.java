@@ -26,12 +26,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 /**
- * Implements {@link LoanApplyService}
+ * Implements {@link LoanApplicationService}
  *
  * @author nescafe
  */
 @Service
-public class LoanApplyServiceImpl implements LoanApplyService {
+public class LoanApplicationServiceImpl implements LoanApplicationService {
 
 	@Autowired
 	private MessageSource messageSource;
@@ -44,7 +44,7 @@ public class LoanApplyServiceImpl implements LoanApplyService {
 
 	@Autowired
 	private CountryDAO countryDao;
-	
+
 	@Autowired
 	private PersonBlackListService personBlackListService;
 
@@ -54,18 +54,12 @@ public class LoanApplyServiceImpl implements LoanApplyService {
 
 		String firstName = applyDto.getPersonDto().getFirstName().trim();
 		String surName = applyDto.getPersonDto().getSurName().trim();
-		
-		Person person = findOrCreatePerson(firstName, surName);
 
-		Loan loan = new Loan();
-		loan.setAmount(applyDto.getAmount());
-		loan.setTerm(applyDto.getTerm());
-		loan.setPerson(person);
-		loan.setStatus(LoanStatus.APPROVED);
-		
+		checkPersonInBlackList(firstName, surName);
+		Person person = findOrCreatePerson(firstName, surName);
 		Country country = findOrCreateCountry(applyDto);
-		loan.setCountry(country);
-		
+
+		Loan loan = buildLoan(applyDto, person, country);
 		loan = loanDao.save(loan);
 
 		return Converter.toLoanDTO(loan);
@@ -74,8 +68,8 @@ public class LoanApplyServiceImpl implements LoanApplyService {
 	private void validateInputLoan(LoanDTO applyDto) {
 		Assert.notNull(applyDto,
 		        messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL, new String[] { "applyDto" }, Locale.ENGLISH));
-		Assert.notNull(applyDto.getPersonDto(),
-		        messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL, new String[] { "applyDto#personDto" }, Locale.ENGLISH));
+		Assert.notNull(applyDto.getPersonDto(), messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL,
+		        new String[] { "applyDto#personDto" }, Locale.ENGLISH));
 		if (StringUtils.isBlank(applyDto.getPersonDto().getFirstName())) {
 			throw new IllegalArgumentException(messageSource.getMessage(MESSAGE_ARG_MUSNT_BE_NULL_OR_EMPTY,
 			        new String[] { "applyDto#personDto#firstName" }, Locale.ENGLISH));
@@ -86,28 +80,10 @@ public class LoanApplyServiceImpl implements LoanApplyService {
 		}
 	}
 
-	private Country findOrCreateCountry(LoanDTO applyDto) {
-		if(StringUtils.isBlank(applyDto.getCountryCode())) {
-			return null;
+	private void checkPersonInBlackList(String firstName, String surName) {
+		if (personBlackListService.inList(firstName, surName)) {
+			throw new ApplicationException(ApplicationException.Type.PERSON_IN_BLACKLIST);
 		}
-		
-		String countryCode = applyDto.getCountryCode().trim().toLowerCase();
-		Country country = countryDao.findByCode(countryCode);
-		if(country == null) {
-			Country createdCountry = new Country();
-			createdCountry.setCode(countryCode);
-			
-			// Might someone else already save the country?
-			try {
-				country = countryDao.save(createdCountry);
-			} catch (DataIntegrityViolationException e) {
-				country = countryDao.findByCode(countryCode);
-				if(country == null) {
-					throw new IllegalStateException("The CountryDAO#save has failed.", e);
-				}
-			}
-		}
-		return country;
 	}
 
 	private Person findOrCreatePerson(String firstName, String surName) {
@@ -116,20 +92,51 @@ public class LoanApplyServiceImpl implements LoanApplyService {
 			Person createdPerson = new Person();
 			createdPerson.setFirstName(firstName);
 			createdPerson.setSurName(surName);
-			
+
 			try {
 				person = personDao.save(createdPerson);
 			} catch (DataIntegrityViolationException e) {
 				person = personDao.findByFirstNameAndSurName(firstName, surName);
-				if(person == null) {
+				if (person == null) {
 					throw new IllegalStateException("The PersonDAO#save has failed.", e);
 				}
 			}
-			// TODO add find by name and surName
-		} else if (personBlackListService.inList(person.getId())) {
-			throw new ApplicationException(ApplicationException.Type.PERSON_IN_BLACKLIST);
 		}
 		return person;
+	}
+
+	private Country findOrCreateCountry(LoanDTO applyDto) {
+		if (StringUtils.isBlank(applyDto.getCountryCode())) {
+			return null;
+		}
+
+		String countryCode = applyDto.getCountryCode().trim().toLowerCase();
+		Country country = countryDao.findByCode(countryCode);
+		if (country == null) {
+			Country createdCountry = new Country();
+			createdCountry.setCode(countryCode);
+
+			// Might someone else already save the country?
+			try {
+				country = countryDao.save(createdCountry);
+			} catch (DataIntegrityViolationException e) {
+				country = countryDao.findByCode(countryCode);
+				if (country == null) {
+					throw new IllegalStateException("The CountryDAO#save has failed.", e);
+				}
+			}
+		}
+		return country;
+	}
+
+	private Loan buildLoan(LoanDTO applyDto, Person person, Country country) {
+		Loan loan = new Loan();
+		loan.setAmount(applyDto.getAmount());
+		loan.setTerm(applyDto.getTerm());
+		loan.setPerson(person);
+		loan.setStatus(LoanStatus.APPROVED);
+		loan.setCountry(country);
+		return loan;
 	}
 
 }

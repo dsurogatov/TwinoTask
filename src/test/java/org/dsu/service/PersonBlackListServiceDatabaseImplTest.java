@@ -5,18 +5,14 @@ package org.dsu.service;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import org.dsu.dao.BlackListDAO;
-import org.dsu.dao.PersonDAO;
 import org.dsu.domain.BlackList;
-import org.dsu.domain.Person;
 import org.dsu.service.blacklist.PersonBlackListService;
 import org.dsu.service.blacklist.PersonBlackListServiceDatabaseImpl;
 import org.junit.Before;
@@ -43,72 +39,40 @@ public class PersonBlackListServiceDatabaseImplTest {
 	@Autowired
 	private BlackListDAO blackListDao;
 
-	@Autowired
-	private PersonDAO personDao;
-	
 	@Before
 	public void setUp() {
 		Mockito.reset(blackListDao);
-		Mockito.reset(personDao);
 	}
 	
 	@Test
 	public void givenPersonNotInBlackList_WhenRunInList_ThenReturnFalse() {
-		when(personDao.findOne(anyLong())).thenReturn(new Person());
-		when(blackListDao.findByPerson(any(Person.class))).thenReturn(null);
+		when(blackListDao.findByPersonFirstNameAndPersonSurName(anyString(), anyString())).thenReturn(null);
 		
-		boolean result = personBlackListServiceDatabaseImpl.inList(1L);
+		boolean result = personBlackListServiceDatabaseImpl.inList("s", "s");
 		
 		assertFalse(result);
 		
-		verify(personDao, times(1)).findOne(anyLong());
-		verifyNoMoreInteractions(personDao);
-		verify(blackListDao, times(1)).findByPerson(any(Person.class));
+		verify(blackListDao, times(1)).findByPersonFirstNameAndPersonSurName(anyString(), anyString());
 		verifyNoMoreInteractions(blackListDao);
 	}
 	
 	@Test
 	public void givenPersonInBlackList_WhenRunInList_ThenReturnTrue() {
-		when(personDao.findOne(anyLong())).thenReturn(new Person());
-		when(blackListDao.findByPerson(any(Person.class))).thenReturn(new BlackList());
+		when(blackListDao.findByPersonFirstNameAndPersonSurName(anyString(), anyString())).thenReturn(new BlackList());
 		
-		boolean result = personBlackListServiceDatabaseImpl.inList(1L);
+		boolean result = personBlackListServiceDatabaseImpl.inList("s", "s");
 		
 		assertTrue(result);
 		
-		verify(personDao, times(1)).findOne(anyLong());
-		verifyNoMoreInteractions(personDao);
-		verify(blackListDao, times(1)).findByPerson(any(Person.class));
+		verify(blackListDao, times(1)).findByPersonFirstNameAndPersonSurName(anyString(), anyString());
 		verifyNoMoreInteractions(blackListDao);
-	}
-	
-	@Test
-	public void givenNotExistPerson_WhenRunInList_ThenReturnFalse() {
-		when(personDao.findOne(anyLong())).thenReturn(null);
-		
-		boolean result = personBlackListServiceDatabaseImpl.inList(1L);
-		
-		assertFalse(result);
-		
-		verify(personDao, times(1)).findOne(anyLong());
-		verifyNoMoreInteractions(personDao);
-		verifyZeroInteractions(blackListDao);
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test(expected = Exception.class)
-	public void givenPersonDaoFails_WhenRunInList_ThenThrowException() {
-		when(personDao.findOne(anyLong())).thenThrow(Exception.class);
-		
-		personBlackListServiceDatabaseImpl.inList(1L);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test(expected = Exception.class)
 	public void givenBlackListDaoFails_WhenRunInList_ThenThrowException() {
-		when(personDao.findOne(anyLong())).thenReturn(new Person());
-		when(blackListDao.findByPerson(any(Person.class))).thenThrow(Exception.class);
+		when(blackListDao.findByPersonFirstNameAndPersonSurName(anyString(), anyString())).thenThrow(Exception.class);
 		
-		personBlackListServiceDatabaseImpl.inList(1L);
+		personBlackListServiceDatabaseImpl.inList("s", "s");
 	}
 }

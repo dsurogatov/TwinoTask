@@ -17,7 +17,7 @@ import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
 import org.dsu.dto.PersonDTO;
 import org.dsu.service.countryresolver.CountryResolverService;
-import org.dsu.service.loan.LoanApplyService;
+import org.dsu.service.loan.LoanApplicationService;
 import org.dsu.service.loan.LoanService;
 import org.dsu.service.validation.LoanApplicationLimitRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public final class LoanController {
 	private LoanService loanService;
 
 	@Autowired
-	private LoanApplyService applyLoanService;
+	private LoanApplicationService loanApplicationService;
 
 	@Autowired
 	private CountryResolverService countryResolverService;
@@ -75,6 +75,6 @@ public final class LoanController {
 		
 		LoanDTO loanDto = new LoanDTO(null, dto.getAmount(), dto.getTerm(), 
 				new PersonDTO(null, dto.getFirstName(), dto.getSurName()), null, null, countryCode);
-		return applyLoanService.apply(loanDto);
+		return loanApplicationService.apply(loanDto);
 	}
 }

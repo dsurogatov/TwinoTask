@@ -7,7 +7,7 @@ import java.util.Locale;
 
 import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.service.countryresolver.CountryResolverService;
-import org.dsu.service.loan.LoanApplyService;
+import org.dsu.service.loan.LoanApplicationService;
 import org.junit.Before;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,14 +36,14 @@ public class BaseLoanControllerApplyTest {
 	protected WebApplicationContext webApplicationContext;
 
 	@Autowired
-	protected LoanApplyService applyLoanService;
+	protected LoanApplicationService loanApplicationService;
 	
 	@Autowired
 	protected CountryResolverService countryResolverService;
 	
 	@Before
 	public void setUp() {
-		Mockito.reset(applyLoanService);
+		Mockito.reset(loanApplicationService);
 		Mockito.reset(countryResolverService);
 
 		mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.dsu.service;
+package org.dsu.service.loanapplication;
 
 import static org.dsu.TestObjectHelper.approvedLoan;
 import static org.dsu.TestObjectHelper.country;
@@ -25,7 +25,8 @@ import org.dsu.domain.Country;
 import org.dsu.domain.Loan;
 import org.dsu.domain.Person;
 import org.dsu.dto.LoanDTO;
-import org.dsu.service.loan.LoanApplyService;
+import org.dsu.service.ServiceConfig;
+import org.dsu.service.loan.LoanApplicationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,14 +38,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * Tests {@link LoanApplyService} connected this the {@link CountryDAO}.
+ * Tests {@link LoanApplicationService} connected this the {@link CountryDAO}.
  *
  * @author nescafe
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ServiceConfig.class })
 @ActiveProfiles("test")
-public class LoanApplyServiceCountryTest {
+public class LoanApplicationServiceCountryTest {
 
 	@Autowired
 	private LoanDAO loanDao;
@@ -56,7 +57,7 @@ public class LoanApplyServiceCountryTest {
 	private CountryDAO countryDao;
 
 	@Autowired
-	private LoanApplyService applyLoanService;
+	private LoanApplicationService loanApplicationService;
 
 	@Before
 	public void setUp() {
@@ -76,7 +77,7 @@ public class LoanApplyServiceCountryTest {
 		when(countryDao.findByCode(eq("ru"))).thenReturn(null);
 		when(countryDao.save(any(Country.class))).thenReturn(country);
 
-		applyLoanService.apply(loanDto(null, null, "firstName", "surName", "ru"));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "surName", "ru"));
 
 		verify(countryDao, times(1)).findByCode(eq("ru"));
 		verify(countryDao, times(1)).save(any(Country.class));
@@ -94,7 +95,7 @@ public class LoanApplyServiceCountryTest {
 		when(countryDao.findByCode(eq("ru"))).thenReturn(null);
 		when(countryDao.save(any(Country.class))).thenReturn(country);
 
-		applyLoanService.apply(loanDto(null, null, "firstName", "surName", "RU"));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "surName", "RU"));
 
 		verify(countryDao, times(1)).findByCode(eq("ru"));
 		verify(countryDao, times(1)).save(any(Country.class));
@@ -109,7 +110,7 @@ public class LoanApplyServiceCountryTest {
 		when(loanDao.save(any(Loan.class))).thenReturn(loan);
 		when(personDao.findByFirstNameAndSurName(eq("firstName"), eq("surName"))).thenReturn(person);
 
-		LoanDTO dto = applyLoanService.apply(loanDto(null, null, "firstName", "surName", null));
+		LoanDTO dto = loanApplicationService.apply(loanDto(null, null, "firstName", "surName", null));
 
 		assertNull(dto.getCountryCode());
 
@@ -124,7 +125,7 @@ public class LoanApplyServiceCountryTest {
 		when(loanDao.save(any(Loan.class))).thenReturn(loan);
 		when(personDao.findByFirstNameAndSurName(eq("firstName"), eq("surName"))).thenReturn(person);
 
-		LoanDTO dto = applyLoanService.apply(loanDto(null, null, "firstName", "surName", "  "));
+		LoanDTO dto = loanApplicationService.apply(loanDto(null, null, "firstName", "surName", "  "));
 
 		assertNull(dto.getCountryCode());
 
@@ -141,7 +142,7 @@ public class LoanApplyServiceCountryTest {
 		when(personDao.findByFirstNameAndSurName(eq("firstName"), eq("surName"))).thenReturn(person);
 		
 		try {
-			applyLoanService.apply(loanDto(null, null, "firstName", "surName", "ru"));
+			loanApplicationService.apply(loanDto(null, null, "firstName", "surName", "ru"));
 		} catch (IllegalStateException e){
 			if(e.getCause().getClass() != DataIntegrityViolationException.class) {
 				fail();
@@ -157,7 +158,7 @@ public class LoanApplyServiceCountryTest {
 	public void givenCountryDaoSaveFail_WhenApplyLoan_ThenThrowException() {
 		when(countryDao.save(any(Country.class))).thenThrow(Exception.class);
 
-		applyLoanService.apply(loanDto(null, null, "firstName", "surName", "ru"));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "surName", "ru"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -165,6 +166,6 @@ public class LoanApplyServiceCountryTest {
 	public void givenCountryDaoFindByNamesFail_WhenApplyLoan_ThenThrowException() {
 		when(countryDao.findByCode(eq("ru"))).thenThrow(Exception.class);
 
-		applyLoanService.apply(loanDto(null, null, "firstName", "surName", "ru"));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "surName", "ru"));
 	}
 }

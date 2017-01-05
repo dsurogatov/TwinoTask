@@ -6,9 +6,7 @@ package org.dsu.service.blacklist;
 import javax.transaction.Transactional;
 
 import org.dsu.dao.BlackListDAO;
-import org.dsu.dao.PersonDAO;
 import org.dsu.domain.BlackList;
-import org.dsu.domain.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,17 +22,9 @@ public class PersonBlackListServiceDatabaseImpl implements PersonBlackListServic
 	@Autowired
 	private BlackListDAO blackListDao;
 
-	@Autowired
-	private PersonDAO personDao;
-
 	@Override
-	public boolean inList(long personId) {
-		Person person = personDao.findOne(personId);
-		if (person == null) {
-			return false;
-		}
-
-		BlackList blackList = blackListDao.findByPerson(person);
+	public boolean inList(String firstName, String surName) {
+		BlackList blackList = blackListDao.findByPersonFirstNameAndPersonSurName(firstName, surName);
 		if (blackList == null) {
 			return false;
 		} else {

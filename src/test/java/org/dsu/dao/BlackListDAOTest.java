@@ -54,7 +54,7 @@ public class BlackListDAOTest {
 		blackList.setPerson(person);
 		blackList = blackListDao.save(blackList);
 		
-		BlackList foundBlackList = blackListDao.findByPerson(person);
+		BlackList foundBlackList = blackListDao.findByPersonFirstNameAndPersonSurName("firstName", "surName");
 		assertEquals(blackList.getId(), foundBlackList.getId());
 		assertEquals(person.getId(), foundBlackList.getPerson().getId());
 	}

@@ -9,10 +9,12 @@ package org.dsu.service.blacklist;
  */
 public interface PersonBlackListService {
 
-	/** Checks the person with the id is in the blacklist.
+	/** Checks the person is in the blacklist
+	 * by the firstName and the surName.
 	 * 
-	 * @param personId  The person's id.
+	 * @param firstName  The firstname.
+	 * @param surName  The surname.
 	 * @return          true if it is the blacklist
 	 */
-	boolean inList(long personId);
+	boolean inList(String firstName, String surName);
 }

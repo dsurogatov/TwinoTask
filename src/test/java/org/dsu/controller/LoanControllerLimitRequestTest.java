@@ -60,7 +60,7 @@ public class LoanControllerLimitRequestTest extends BaseLoanControllerApplyTest 
 				.andExpect(jsonPath("$.message", is("Internal server error.")))
 				;
 		
-		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(loanApplicationService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
 	}
@@ -77,7 +77,7 @@ public class LoanControllerLimitRequestTest extends BaseLoanControllerApplyTest 
 				.andExpect(jsonPath("$.message", is("Internal server error.")))
 				;
 		
-		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(loanApplicationService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
 	}
@@ -95,7 +95,7 @@ public class LoanControllerLimitRequestTest extends BaseLoanControllerApplyTest 
 				.andExpect(jsonPath("$.message", is("The number of loan applications coming from the country is reached.")))
 				;
 		
-		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(loanApplicationService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
         verify(limitRequestService, times(1)).limitReachedByCountry(anyString());
@@ -116,7 +116,7 @@ public class LoanControllerLimitRequestTest extends BaseLoanControllerApplyTest 
 				.andExpect(jsonPath("$.message", is("Internal server error.")))
 				;
 		
-		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(loanApplicationService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
         verify(limitRequestService, times(1)).limitReachedByCountry(anyString());

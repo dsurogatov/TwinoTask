@@ -13,10 +13,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface BlackListDAO extends JpaRepository<BlackList, Long> {
 
-	/** Finds the {@link BlackList} by {@link Person}.
+	/** Finds the {@link BlackList} by {@link Person#getFirstName()} and {@link Person#getSurName()}.
 	 * 
-	 * @param person  The {@link Person}.
-	 * @return        The {@link BlackList}.
+	 * @param firstName  The firstname of the person.
+	 * @param surName    The surname of the person.
+	 * @return           The {@link BlackList}.
 	 */
-	BlackList findByPerson(Person person);
+	BlackList findByPersonFirstNameAndPersonSurName(String firstName, String surName);
 }

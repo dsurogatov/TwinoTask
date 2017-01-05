@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.dsu.service;
+package org.dsu.service.loanapplication;
 
 import static org.dsu.TestObjectHelper.approvedLoan;
 import static org.dsu.TestObjectHelper.country;
@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,8 +28,9 @@ import org.dsu.domain.Country;
 import org.dsu.domain.Loan;
 import org.dsu.domain.Person;
 import org.dsu.dto.LoanDTO;
+import org.dsu.service.ServiceConfig;
 import org.dsu.service.blacklist.PersonBlackListService;
-import org.dsu.service.loan.LoanApplyService;
+import org.dsu.service.loan.LoanApplicationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +48,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ServiceConfig.class })
 @ActiveProfiles("test")
-public class LoanApplyServiceTest {
+public class LoanApplicationServiceTest {
 
 	@Autowired
 	private LoanDAO loanDao;
@@ -59,7 +60,7 @@ public class LoanApplyServiceTest {
 	private CountryDAO countryDao;
 
 	@Autowired
-	private LoanApplyService applyLoanService;
+	private LoanApplicationService loanApplicationService;
 
 	@Autowired
 	private PersonBlackListService personBlackListService;
@@ -84,7 +85,7 @@ public class LoanApplyServiceTest {
 		when(countryDao.findByCode(eq("ru"))).thenReturn(country);
 
 		// call
-		LoanDTO dto = applyLoanService.apply(loanDto(null, null, "firstName", "surName", "ru"));
+		LoanDTO dto = loanApplicationService.apply(loanDto(null, null, "firstName", "surName", "ru"));
 
 		// check result
 		assertEquals(Long.valueOf(1L), dto.getId());
@@ -108,7 +109,7 @@ public class LoanApplyServiceTest {
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void givenNullAppliedLoan_whenApplyLoan_ThenThrowsException() {
-		applyLoanService.apply(null);
+		loanApplicationService.apply(null);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -116,7 +117,7 @@ public class LoanApplyServiceTest {
 	public void givenLoanDaoFail_WhenApplyLoan_ThenThrowException() {
 		when(loanDao.save(any(Loan.class))).thenThrow(Exception.class);
 
-		applyLoanService.apply(loanDto(null, null, "firstName", "surName"));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "surName"));
 	}
 
 	@Test
@@ -125,17 +126,17 @@ public class LoanApplyServiceTest {
 		person.setId(1L);
 		
 		when(personDao.findByFirstNameAndSurName(eq("firstName"), eq("surName"))).thenReturn(person);
-		when(personBlackListService.inList(anyLong())).thenReturn(true);
+		when(personBlackListService.inList(anyString(), anyString())).thenReturn(true);
 
 		try {
-			applyLoanService.apply(loanDto(null, null, "firstName", "surName"));
+			loanApplicationService.apply(loanDto(null, null, "firstName", "surName"));
 		} catch (ApplicationException e) {
 			if(e.getType() != ApplicationException.Type.PERSON_IN_BLACKLIST) {
 				fail();
 			}
 		}
 		
-		verify(personBlackListService, times(1)).inList(anyLong());
+		verify(personBlackListService, times(1)).inList(anyString(), anyString());
 		verifyNoMoreInteractions(personBlackListService);
 	}
 	
@@ -146,9 +147,9 @@ public class LoanApplyServiceTest {
 		person.setId(1L);
 		
 		when(personDao.findByFirstNameAndSurName(eq("firstName"), eq("surName"))).thenReturn(person);
-		when(personBlackListService.inList(anyLong())).thenThrow(Exception.class);
+		when(personBlackListService.inList(anyString(), anyString())).thenThrow(Exception.class);
 
-		applyLoanService.apply(loanDto(null, null, "firstName", "surName"));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "surName"));
 	}
 	
 }

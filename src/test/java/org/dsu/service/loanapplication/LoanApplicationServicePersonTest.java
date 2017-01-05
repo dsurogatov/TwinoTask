@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.dsu.service;
+package org.dsu.service.loanapplication;
 
 import static org.dsu.TestObjectHelper.loanDto;
 import static org.junit.Assert.fail;
@@ -17,7 +17,8 @@ import org.dsu.dao.PersonDAO;
 import org.dsu.domain.Loan;
 import org.dsu.domain.Person;
 import org.dsu.dto.LoanDTO;
-import org.dsu.service.loan.LoanApplyService;
+import org.dsu.service.ServiceConfig;
+import org.dsu.service.loan.LoanApplicationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,14 +30,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * Tests {@link LoanApplyService} connected this the {@link PersonDAO} and input person's attributes.
+ * Tests {@link LoanApplicationService} connected this the {@link PersonDAO} and input person's attributes.
  *
  * @author nescafe
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ServiceConfig.class })
 @ActiveProfiles("test")
-public class LoanApplyServicePersonTest {
+public class LoanApplicationServicePersonTest {
 
 	@Autowired
 	private LoanDAO loanDao;
@@ -45,7 +46,7 @@ public class LoanApplyServicePersonTest {
 	private PersonDAO personDao;
 
 	@Autowired
-	private LoanApplyService applyLoanService;
+	private LoanApplicationService loanApplicationService;
 
 	@Before
 	public void setUp() {
@@ -64,7 +65,7 @@ public class LoanApplyServicePersonTest {
 		loan.setPerson(new Person());
 		when(loanDao.save(any(Loan.class))).thenReturn(loan);
 
-		applyLoanService.apply(loanDto(null, null, "firstName", "surName"));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "surName"));
 
 		// verify personDao's methods save and findByFirstNameAndSurName was called once
 		verify(personDao, times(1)).findByFirstNameAndSurName(eq("firstName"), eq("surName"));
@@ -84,7 +85,7 @@ public class LoanApplyServicePersonTest {
 		when(personDao.save(any(Person.class))).thenThrow(DataIntegrityViolationException.class);
 
 		try {
-			applyLoanService.apply(loanDto(null, null, "firstName", "surName"));
+			loanApplicationService.apply(loanDto(null, null, "firstName", "surName"));
 		} catch (IllegalStateException e) {
 			if(e.getCause().getClass() != DataIntegrityViolationException.class) {
 				fail();
@@ -99,7 +100,7 @@ public class LoanApplyServicePersonTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void givenNullPersonLoan_whenApplyLoan_ThenThrowsException() {
-		applyLoanService.apply(new LoanDTO());
+		loanApplicationService.apply(new LoanDTO());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -107,7 +108,7 @@ public class LoanApplyServicePersonTest {
 	public void givenPersonDaoSaveFail_WhenApplyLoan_ThenThrowException() {
 		when(personDao.save(any(Person.class))).thenThrow(Exception.class);
 
-		applyLoanService.apply(loanDto(null, null, "firstName", "surName"));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "surName"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -115,36 +116,36 @@ public class LoanApplyServicePersonTest {
 	public void givenPersonDaoFindByNamesFail_WhenApplyLoan_ThenThrowException() {
 		when(personDao.findByFirstNameAndSurName(eq("firstName"), eq("surName"))).thenThrow(Exception.class);
 
-		applyLoanService.apply(loanDto(null, null, "firstName", "surName"));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "surName"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void givenNullPersonsFirstName_whenApplyLoan_ThenThrowsException() {
-		applyLoanService.apply(loanDto(null, null, null, "surName"));
+		loanApplicationService.apply(loanDto(null, null, null, "surName"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void givenNullPersonsSurName_whenApplyLoan_ThenThrowsException() {
-		applyLoanService.apply(loanDto(null, null, "firstName", null));
+		loanApplicationService.apply(loanDto(null, null, "firstName", null));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void givenEmptyPersonsFirstName_whenApplyLoan_ThenThrowsException() {
-		applyLoanService.apply(loanDto(null, null, "", "surName"));
+		loanApplicationService.apply(loanDto(null, null, "", "surName"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void givenEmptyPersonsSurName_whenApplyLoan_ThenThrowsException() {
-		applyLoanService.apply(loanDto(null, null, "firstName", ""));
+		loanApplicationService.apply(loanDto(null, null, "firstName", ""));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void givenBlankPersonsFirstName_whenApplyLoan_ThenThrowsException() {
-		applyLoanService.apply(loanDto(null, null, "  ", "surName"));
+		loanApplicationService.apply(loanDto(null, null, "  ", "surName"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void givenBlankPersonsSurName_whenApplyLoan_ThenThrowsException() {
-		applyLoanService.apply(loanDto(null, null, "firstName", "  "));
+		loanApplicationService.apply(loanDto(null, null, "firstName", "  "));
 	}
 }

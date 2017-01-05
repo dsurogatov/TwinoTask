@@ -1,7 +1,7 @@
 package org.dsu.controller;
 
 import org.dsu.service.countryresolver.CountryResolverService;
-import org.dsu.service.loan.LoanApplyService;
+import org.dsu.service.loan.LoanApplicationService;
 import org.dsu.service.loan.LoanService;
 import org.dsu.service.validation.LoanApplicationLimitRequestService;
 import org.mockito.Mockito;
@@ -39,8 +39,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
     }
 
 	@Bean
-	public LoanApplyService applyLoanService() {
-		return Mockito.mock(LoanApplyService.class);
+	public LoanApplicationService loanApplicationService() {
+		return Mockito.mock(LoanApplicationService.class);
 	}
 
 	@Bean

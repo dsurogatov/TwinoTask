@@ -66,7 +66,7 @@ public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 		        .andExpect(jsonPath("$.validationMessages[*][0]", containsInAnyOrder(LOAN_FIELDS)))
 		        .andExpect(jsonPath("$.validationMessages[*][1]", containsInAnyOrder(VALID_MAXLEN_MESS)));
 
-		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(loanApplicationService);
 		verifyZeroInteractions(countryResolverService);
 	}
 
@@ -99,7 +99,7 @@ public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 	        .andExpect(jsonPath("$.validationMessages[0][1]", is("The amount value of the loan is less than minimum.")))
 	        ;
 		
-		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(loanApplicationService);
 		verifyZeroInteractions(countryResolverService);
 	}
 	
@@ -110,7 +110,7 @@ public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 		LoanDTO retLoan = new LoanDTO(1L, BigDecimal.valueOf(12.45), "Term", 
 				new PersonDTO(1L, "first", "second"), createdDateTime, "approved", null);
 		
-		when(applyLoanService.apply(any(LoanDTO.class))).thenReturn(retLoan);
+		when(loanApplicationService.apply(any(LoanDTO.class))).thenReturn(retLoan);
 		when(countryResolverService.resolveCode()).thenReturn("ru");
 		
 		postObject(dto)
@@ -126,8 +126,8 @@ public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 	            .andExpect(jsonPath("$.statusName", is("approved")))
 	            ;
 
-		verify(applyLoanService, times(1)).apply(any(LoanDTO.class));
-        verifyNoMoreInteractions(applyLoanService);
+		verify(loanApplicationService, times(1)).apply(any(LoanDTO.class));
+        verifyNoMoreInteractions(loanApplicationService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
 	}
@@ -138,7 +138,7 @@ public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
 		
 		when(countryResolverService.resolveCode()).thenReturn("ru");
-		when(applyLoanService.apply(any(LoanDTO.class))).thenThrow(Exception.class);
+		when(loanApplicationService.apply(any(LoanDTO.class))).thenThrow(Exception.class);
 		
 		postObject(dto)
 				.andExpect(status().isInternalServerError())
@@ -146,8 +146,8 @@ public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 				.andExpect(jsonPath("$.message", is("Internal server error.")))
 				;
 		
-		verify(applyLoanService, times(1)).apply(any(LoanDTO.class));
-        verifyNoMoreInteractions(applyLoanService);
+		verify(loanApplicationService, times(1)).apply(any(LoanDTO.class));
+        verifyNoMoreInteractions(loanApplicationService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
 	}
@@ -157,7 +157,7 @@ public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
 		
 		when(countryResolverService.resolveCode()).thenReturn("ru");
-		when(applyLoanService.apply(any(LoanDTO.class)))
+		when(loanApplicationService.apply(any(LoanDTO.class)))
 			.thenThrow(new ApplicationException(ApplicationException.Type.PERSON_IN_BLACKLIST));
 		
 		postObject(dto)
@@ -166,8 +166,8 @@ public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 				.andExpect(jsonPath("$.message", is("The person is in the black list.")))
 				;
 		
-		verify(applyLoanService, times(1)).apply(any(LoanDTO.class));
-        verifyNoMoreInteractions(applyLoanService);
+		verify(loanApplicationService, times(1)).apply(any(LoanDTO.class));
+        verifyNoMoreInteractions(loanApplicationService);
         verify(countryResolverService, times(1)).resolveCode();
         verifyNoMoreInteractions(countryResolverService);
 	}
@@ -181,7 +181,7 @@ public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 		        .andExpect(jsonPath("$.validationMessages[*][0]", containsInAnyOrder(LOAN_FIELDS)))
 		        .andExpect(jsonPath("$.validationMessages[*][1]", containsInAnyOrder(VALID_EMPTY_MESS)));
 
-		verifyZeroInteractions(applyLoanService);
+		verifyZeroInteractions(loanApplicationService);
 		verifyZeroInteractions(countryResolverService);
 	}
 

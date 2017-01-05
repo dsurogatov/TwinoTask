@@ -9,8 +9,7 @@ import org.dsu.dto.LoanDTO;
  *
  * @author nescafe
  */
-//TODO should be renamed? LoanApplicationService
-public interface LoanApplyService {
+public interface LoanApplicationService {
 
 	/** Creates a new Loan.
 	 *  
