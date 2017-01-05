@@ -68,7 +68,7 @@ public class LoanControllerTest {
 
 		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+			.andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 			.andExpect(jsonPath("$", hasSize(2)))
 			.andExpect(jsonPath("$[0].id", is(1)))
             .andExpect(jsonPath("$[0].amount", is(BigDecimal.valueOf(12.45).doubleValue())))
@@ -104,7 +104,7 @@ public class LoanControllerTest {
 		// perform a request
 		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isInternalServerError())
-		.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+		.andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 		.andExpect(jsonPath("$.message", is("Internal server error.")))
 		;
 		
@@ -125,7 +125,7 @@ public class LoanControllerTest {
 		// perform request
 		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person/1?page=0&size=3").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+			.andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 			.andExpect(jsonPath("$", hasSize(2)))
 			.andExpect(jsonPath("$[0].id", is(1)))
 	        .andExpect(jsonPath("$[0].amount", is(BigDecimal.valueOf(12.45).doubleValue())))
@@ -162,7 +162,7 @@ public class LoanControllerTest {
 		// perform a request
 		mvc.perform(MockMvcRequestBuilders.get("/api/v1/loan/approved/person/1").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isInternalServerError())
-			.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+			.andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 			.andExpect(jsonPath("$.message", is("Internal server error.")))
 			;
 

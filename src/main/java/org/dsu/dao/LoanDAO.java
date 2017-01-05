@@ -3,6 +3,7 @@
  */
 package org.dsu.dao;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.dsu.domain.Loan;
@@ -33,4 +34,19 @@ public interface LoanDAO extends JpaRepository<Loan, Long> {
 	 * @return          The list of loans.
 	 */
 	List<Loan> findByStatusAndPerson(LoanStatus status, Person person, Pageable page);
+	
+	/** Finds the last added the loan.
+	 * 
+	 * @return  The last loan.
+	 */
+	Loan findTopByOrderByCreatedDesc();
+	
+	/** Finds the number of loans added from the same country for the time period.
+	 * 
+	 * @param code     The two letter country code.
+	 * @param begin    The beginning datetime of the period.
+	 * @param end      The ending datetime of the period.
+	 * @return         The number of created loans.
+	 */
+	int countByCountryCodeAndCreatedBetween(String code, LocalDateTime begin, LocalDateTime end);
 }

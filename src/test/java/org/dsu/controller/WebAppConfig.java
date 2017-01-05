@@ -3,6 +3,7 @@ package org.dsu.controller;
 import org.dsu.service.countryresolver.CountryResolverService;
 import org.dsu.service.loan.LoanApplyService;
 import org.dsu.service.loan.LoanService;
+import org.dsu.service.validation.LoanApplicationLimitRequestService;
 import org.mockito.Mockito;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +46,11 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public CountryResolverService countryResolverService() {
 		return Mockito.mock(CountryResolverService.class);
+	}
+	
+	@Bean
+	public LoanApplicationLimitRequestService loanApplicationLimitRequestService() {
+		return Mockito.mock(LoanApplicationLimitRequestService.class);
 	}
 	
 	@Bean

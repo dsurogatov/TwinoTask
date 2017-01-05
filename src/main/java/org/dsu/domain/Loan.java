@@ -138,4 +138,10 @@ public class Loan extends AbstractIdableEntity {
 		this.country = country;
 	}
 
+	@Override
+	public String toString() {
+		return "Loan [amount=" + amount + ", term=" + term + ", status=" + status + ", person=" + person + ", country="
+		        + country + ", created=" + created + ", getId()=" + getId() + "]";
+	}
+
 }

@@ -82,10 +82,8 @@ public final class RestExceptionProcessor {
 	public ResponseEntity<ErrorInfo> handleApplicationException(ApplicationException ex) {
 		String message = messageSource.getMessage("application.exception." + ex.getType().name().toLowerCase(), null,
 		        LocaleContextHolder.getLocale());
-		if (ex.getType() == ApplicationException.Type.PERSON_IN_BLACKLIST) {
-			return new ResponseEntity<ErrorInfo>(new ErrorInfo(message), HttpStatus.FORBIDDEN);
-		}
-		return new ResponseEntity<ErrorInfo>(new ErrorInfo("Internal server error."), HttpStatus.INTERNAL_SERVER_ERROR);
+		
+		return new ResponseEntity<ErrorInfo>(new ErrorInfo(message), ex.getStatus());
 	}
 
 	@ExceptionHandler(Exception.class)

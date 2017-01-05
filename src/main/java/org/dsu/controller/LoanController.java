@@ -11,12 +11,15 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
+import org.dsu.ApplicationException;
 import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
 import org.dsu.dto.PersonDTO;
 import org.dsu.service.countryresolver.CountryResolverService;
 import org.dsu.service.loan.LoanApplyService;
 import org.dsu.service.loan.LoanService;
+import org.dsu.service.validation.LoanApplicationLimitRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +47,9 @@ public final class LoanController {
 
 	@Autowired
 	private CountryResolverService countryResolverService;
+	
+	@Autowired
+	private LoanApplicationLimitRequestService loanApplicationLimitRequestService;
 
 	@RequestMapping(value = "/approved", method = RequestMethod.GET)
 	public List<LoanDTO> getApprovedLoans(Pageable page) {
@@ -59,6 +65,14 @@ public final class LoanController {
 	public LoanDTO applyLoan(@Valid @RequestBody ApplyLoanDTO dto) {
 		//LOG.info("dto - " + dto);
 		String countryCode = countryResolverService.resolveCode();
+		if(StringUtils.isBlank(countryCode)) {
+			throw new IllegalStateException("The country code has not been resolved.");
+		}
+		
+		if(loanApplicationLimitRequestService.limitReachedByCountry(countryCode)) {
+			throw new ApplicationException(ApplicationException.Type.LIMIT_REQUEST_REACHED);
+		}
+		
 		LoanDTO loanDto = new LoanDTO(null, dto.getAmount(), dto.getTerm(), 
 				new PersonDTO(null, dto.getFirstName(), dto.getSurName()), null, null, countryCode);
 		return applyLoanService.apply(loanDto);

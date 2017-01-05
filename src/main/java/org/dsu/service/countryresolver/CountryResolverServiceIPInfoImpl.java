@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dsu.Constant;
 import org.dsu.component.RemoteAddressResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +39,10 @@ public class CountryResolverServiceIPInfoImpl implements CountryResolverService 
 	private final ParameterizedTypeReference<Map<String, Object>> type = new ParameterizedTypeReference<Map<String, Object>>() {
 	};
 
-	@Value("${ipinfo.url:ipinfo.io}")
+	@Value("${" + Constant.APP_PROP_IPINFO_URL + ":ipinfo.io}")
 	private String ipInfoUrl;
 
-	@Resource(name="${RemoteAddressResolver.name:remoteAddressResolver}")
+	@Resource(name = "${" + Constant.APP_PROP_REMOTEADDRESSRESOLVER_SERVICE + ":remoteAddressResolver}")
 	private RemoteAddressResolver remoteAddressResolver;
 
 	@Autowired
@@ -64,7 +65,7 @@ public class CountryResolverServiceIPInfoImpl implements CountryResolverService 
 			ResponseEntity<Map<String, Object>> result = ipInfoRestTemplate.exchange(buildUrl(ip), HttpMethod.GET,
 			        entity, type);
 			Map<String, Object> returnedMap = result.getBody();
-			if(LOG.isDebugEnabled()) {
+			if (LOG.isDebugEnabled()) {
 				LOG.debug("" + returnedMap);
 			}
 			if (returnedMap.containsKey(COUNTRY_KEY)) {

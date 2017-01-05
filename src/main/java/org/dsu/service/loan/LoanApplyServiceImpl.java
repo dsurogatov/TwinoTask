@@ -125,6 +125,7 @@ public class LoanApplyServiceImpl implements LoanApplyService {
 					throw new IllegalStateException("The PersonDAO#save has failed.", e);
 				}
 			}
+			// TODO add find by name and surName
 		} else if (personBlackListService.inList(person.getId())) {
 			throw new ApplicationException(ApplicationException.Type.PERSON_IN_BLACKLIST);
 		}

@@ -4,9 +4,9 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.MediaType;
 
-public final class ControllerTestUtil {
-
-	private ControllerTestUtil() {
+public final class TestControllerUtil {
+	
+	private TestControllerUtil() {
 
 	}
 

@@ -18,32 +18,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Locale;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.dsu.ApplicationException;
 import org.dsu.dto.ApplyLoanDTO;
 import org.dsu.dto.LoanDTO;
 import org.dsu.dto.PersonDTO;
-import org.dsu.service.countryresolver.CountryResolverService;
-import org.dsu.service.loan.LoanApplyService;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tests apply a new loan.
@@ -54,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ContextConfiguration(classes = { WebAppConfig.class })
 @WebAppConfiguration
 @ActiveProfiles("test")
-public class LoanControllerApplyTest {
+public class LoanControllerApplyTest extends BaseLoanControllerApplyTest {
 
 	private static final String[] LOAN_FIELDS = { "amount", "term", "firstName", "surName" };
 	private static final String[] VALID_MAXLEN_MESS = { 
@@ -65,28 +52,6 @@ public class LoanControllerApplyTest {
 	private static final String[] VALID_EMPTY_MESS = { "The value must not be empty.", "The value must not be empty.",
 	        "The value must not be empty.", "The value must not be empty." };
 
-	private MockMvc mvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	private WebApplicationContext webApplicationContext;
-
-	@Autowired
-	private LoanApplyService applyLoanService;
-	
-	@Autowired
-	private CountryResolverService countryResolverService;
-	
-	@Before
-	public void setUp() {
-		Mockito.reset(applyLoanService);
-		Mockito.reset(countryResolverService);
-
-		mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-	}
-
 	@Test
 	public void givenLongLengthAttrsLoan_WhenAskApplyLoan_ThenReturnBadRequest() throws Exception {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.valueOf(1000001), 
@@ -96,7 +61,7 @@ public class LoanControllerApplyTest {
 
 		ResultActions ra = postObject(dto);
 
-		ra.andExpect(status().isBadRequest()).andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+		ra.andExpect(status().isBadRequest()).andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 		        .andExpect(jsonPath("$.validationMessages", hasSize(4)))
 		        .andExpect(jsonPath("$.validationMessages[*][0]", containsInAnyOrder(LOAN_FIELDS)))
 		        .andExpect(jsonPath("$.validationMessages[*][1]", containsInAnyOrder(VALID_MAXLEN_MESS)));
@@ -128,7 +93,7 @@ public class LoanControllerApplyTest {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.ZERO, "s", "s", "s");
 
 		ResultActions ra = postObject(dto);
-		ra.andExpect(status().isBadRequest()).andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+		ra.andExpect(status().isBadRequest()).andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 	        .andExpect(jsonPath("$.validationMessages", hasSize(1)))
 	        .andExpect(jsonPath("$.validationMessages[0][0]", is("amount")))
 	        .andExpect(jsonPath("$.validationMessages[0][1]", is("The amount value of the loan is less than minimum.")))
@@ -146,10 +111,11 @@ public class LoanControllerApplyTest {
 				new PersonDTO(1L, "first", "second"), createdDateTime, "approved", null);
 		
 		when(applyLoanService.apply(any(LoanDTO.class))).thenReturn(retLoan);
-
+		when(countryResolverService.resolveCode()).thenReturn("ru");
+		
 		postObject(dto)
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+				.andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 				.andExpect(jsonPath("$.id", is(1)))
 	            .andExpect(jsonPath("$.amount", is(BigDecimal.valueOf(12.45).doubleValue())))
 	            .andExpect(jsonPath("$.term", is("Term")))
@@ -168,14 +134,15 @@ public class LoanControllerApplyTest {
 		
 	@SuppressWarnings("unchecked")
 	@Test
-	public void givenApplyLoanServiceFails_WhenAskApplyLoan_ThenReturtInternalServerError() throws Exception {
+	public void givenApplyLoanServiceFails_WhenAskApplyLoan_ThenReturnInternalServerError() throws Exception {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
 		
+		when(countryResolverService.resolveCode()).thenReturn("ru");
 		when(applyLoanService.apply(any(LoanDTO.class))).thenThrow(Exception.class);
 		
 		postObject(dto)
 				.andExpect(status().isInternalServerError())
-				.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+				.andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 				.andExpect(jsonPath("$.message", is("Internal server error.")))
 				;
 		
@@ -186,15 +153,16 @@ public class LoanControllerApplyTest {
 	}
 	
 	@Test
-	public void givenPersonInBlackList_WhenAskApplyLoan_ThenReturtForbidden() throws Exception {
+	public void givenPersonInBlackList_WhenAskApplyLoan_ThenReturnForbidden() throws Exception {
 		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
 		
+		when(countryResolverService.resolveCode()).thenReturn("ru");
 		when(applyLoanService.apply(any(LoanDTO.class)))
 			.thenThrow(new ApplicationException(ApplicationException.Type.PERSON_IN_BLACKLIST));
 		
 		postObject(dto)
 				.andExpect(status().isForbidden())
-				.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+				.andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 				.andExpect(jsonPath("$.message", is("The person is in the black list.")))
 				;
 		
@@ -204,36 +172,11 @@ public class LoanControllerApplyTest {
         verifyNoMoreInteractions(countryResolverService);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void givenCountryResolverServiceFails_WhenAskApplyLoan_ThenReturtInternalServerError() throws Exception {
-		ApplyLoanDTO dto = new ApplyLoanDTO(BigDecimal.TEN, "s", "s", "s");
-		
-		when(countryResolverService.resolveCode()).thenThrow(Exception.class);
-		
-		postObject(dto)
-				.andExpect(status().isInternalServerError())
-				.andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
-				.andExpect(jsonPath("$.message", is("Internal server error.")))
-				;
-		
-		verifyZeroInteractions(applyLoanService);
-        verify(countryResolverService, times(1)).resolveCode();
-        verifyNoMoreInteractions(countryResolverService);
-	}
-	
-	private ResultActions postObject(ApplyLoanDTO dto) throws Exception, JsonProcessingException {
-		return mvc.perform(MockMvcRequestBuilders.post("/api/v1/loan")
-				.contentType(ControllerTestUtil.APPLICATION_JSON_UTF8)
-		        .locale(Locale.ENGLISH)
-		        .content(objectMapper.writeValueAsBytes(dto)));
-	}
-
 	private void testEmptyInputArgsForApllyLoan(ApplyLoanDTO dto) throws Exception {
 
 		ResultActions ra = postObject(dto);
 		// System.out.println("===== " + ra.andReturn().getResponse().getContentAsString());
-		ra.andExpect(status().isBadRequest()).andExpect(content().contentType(ControllerTestUtil.APPLICATION_JSON_UTF8))
+		ra.andExpect(status().isBadRequest()).andExpect(content().contentType(TestControllerUtil.APPLICATION_JSON_UTF8))
 		        .andExpect(jsonPath("$.validationMessages", hasSize(4)))
 		        .andExpect(jsonPath("$.validationMessages[*][0]", containsInAnyOrder(LOAN_FIELDS)))
 		        .andExpect(jsonPath("$.validationMessages[*][1]", containsInAnyOrder(VALID_EMPTY_MESS)));

@@ -27,7 +27,7 @@ public class Application {
 
 	@Bean
 	public RestTemplate ipInfoRestTemplate() {
-		int timeout = env.getProperty("ipinfo.timeout", Integer.class, 1000);
+		int timeout = env.getProperty(Constant.APP_PROP_IPINFO_TIMEOUT, Integer.class, 1000);
 		HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
 		clientHttpRequestFactory.setConnectTimeout(timeout);
 

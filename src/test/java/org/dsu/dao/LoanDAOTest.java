@@ -3,16 +3,21 @@ package org.dsu.dao;
 import static org.dsu.TestObjectHelper.PAGE_DEFAULT;
 import static org.dsu.TestObjectHelper.PERSON_DEFAULT;
 import static org.dsu.TestObjectHelper.approvedLoan;
+import static org.dsu.TestObjectHelper.country;
+import static org.dsu.TestObjectHelper.person;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.dsu.config.DataSourceConfig;
 import org.dsu.config.JPAConfig;
+import org.dsu.domain.Country;
 import org.dsu.domain.Loan;
 import org.dsu.domain.LoanStatus;
 import org.dsu.domain.Person;
@@ -39,6 +44,9 @@ public class LoanDAOTest {
 
 	@Autowired
 	private PersonDAO personDao;
+
+	@Autowired
+	private CountryDAO countryDao;
 
 	@After
 	public void cleanData() {
@@ -108,6 +116,35 @@ public class LoanDAOTest {
 		assertEquals(PERSON_DEFAULT.getFirstName(), entity.getPerson().getFirstName());
 		assertEquals(PERSON_DEFAULT.getSurName(), entity.getPerson().getSurName());
 		assertNull(entity.getCountry());
+	}
+	
+	@Test
+	public void whenFindTopByOrderByCreatedDesc_ThenReturnLastAddedLoan() {
+		Loan loan = approvedLoan(null, 11.645, "term", personDao.save(PERSON_DEFAULT), null);
+		loanDao.save(loan);
+		loan = approvedLoan(null, 10.645, "term1", personDao.save(person(null, "first1", "sur1")), null);
+		loanDao.save(loan);
+		
+		Loan foundLoan = loanDao.findTopByOrderByCreatedDesc();
+		assertNotNull(foundLoan.getId());
+		assertEquals(BigDecimal.valueOf(10.65), foundLoan.getAmount());
+		assertEquals("term1", foundLoan.getTerm());
+		assertNotNull(foundLoan.getCreated());
+		assertNotNull(foundLoan.getPerson().getId());
+		assertEquals("first1", foundLoan.getPerson().getFirstName());
+		assertEquals("sur1", foundLoan.getPerson().getSurName());
+		assertNull(foundLoan.getCountry());
+	}
+	
+	@Test
+	public void whenCountByCountryCodeAndCreatedBetween_ThenReturnOne() {
+		Country ru = countryDao.save(country(null, "ru"));
+		Loan loan = approvedLoan(null, 1, "term", personDao.save(PERSON_DEFAULT), ru);
+		loanDao.save(loan);
+		
+		int result = loanDao.countByCountryCodeAndCreatedBetween("ru", 
+				LocalDateTime.now().minus(30, ChronoUnit.SECONDS), LocalDateTime.now());
+		assertEquals(1, result);
 	}
 
 }
