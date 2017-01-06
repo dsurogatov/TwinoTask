@@ -7,6 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -72,6 +73,20 @@ public class LoanApplicationLimitRequestServiceTest {
 	}
 	
 	@Test
+	public void givenPrevLoanFromSameCountry_WhenRunLimitReachedWithCapitalizeCode_ThenReturnTrue() {
+		Country country = new Country();
+		country.setCode("ru");
+		Loan loan = TestObjectHelper.approvedLoan(1L, 1, "term", new Person(), country);
+		when(loanDao.findTopByOrderByCreatedDesc()).thenReturn(loan);
+		
+		boolean result = requestService.limitReachedByCountry("RU");
+		assertTrue(result);
+		
+		verify(loanDao).findTopByOrderByCreatedDesc();
+		verifyNoMoreInteractions(loanDao);
+	}
+	
+	@Test
 	public void givenTooManyRequest_WhenRunLimitReached_ThenReturnTrue() {
 		
 		when(loanDao.findTopByOrderByCreatedDesc()).thenReturn(null);
@@ -83,6 +98,22 @@ public class LoanApplicationLimitRequestServiceTest {
 		
 		verify(loanDao).findTopByOrderByCreatedDesc();
 		verify(loanDao).countByCountryCodeAndCreatedBetween(anyString(), 
+				any(LocalDateTime.class), any(LocalDateTime.class));
+		verifyNoMoreInteractions(loanDao);
+	}
+	
+	@Test
+	public void givenTooManyRequest_WhenRunLimitReachedWithCapitalizeCode_ThenReturnTrue() {
+		
+		when(loanDao.findTopByOrderByCreatedDesc()).thenReturn(null);
+		when(loanDao.countByCountryCodeAndCreatedBetween(eq("ru"), 
+				any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(2);
+		
+		boolean result = requestService.limitReachedByCountry("RU");
+		assertTrue(result);
+		
+		verify(loanDao).findTopByOrderByCreatedDesc();
+		verify(loanDao).countByCountryCodeAndCreatedBetween(eq("ru"), 
 				any(LocalDateTime.class), any(LocalDateTime.class));
 		verifyNoMoreInteractions(loanDao);
 	}

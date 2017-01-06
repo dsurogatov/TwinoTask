@@ -57,7 +57,7 @@ public class LoanApplicationLimitRequestServiceImpl implements LoanApplicationLi
 			        new String[] { "countryCode" }, Locale.ENGLISH));
 		}
 
-		return validateSecondRequest(countryCode) || validateNumberRequest(countryCode);
+		return validateSecondRequest(countryCode.toLowerCase()) || validateNumberRequest(countryCode.toLowerCase());
 	}
 
 	private boolean validateSecondRequest(String countryCode) {
